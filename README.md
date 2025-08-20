@@ -2,6 +2,7 @@
 
 ## Folder Structure
 
+```plaintext
 devlink/
 ├── cmd/
 │   ├── root.go
@@ -20,7 +21,7 @@ devlink/
 │   └── util/
 │       └── token.go
 │
-├──.gitignore
+├── .gitignore
 ├── go.mod
 ├── go.sum
 └── main.go
