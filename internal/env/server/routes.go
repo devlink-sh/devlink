@@ -13,7 +13,7 @@ func setupRoutes(server *Server) {
 	mux.HandleFunc("/stats", server.handleStats)
 
 	server.server = &http.Server{
-		Addr:    fmt.Sprintf(":%d", server.config.P2PPort),
+		Addr:    fmt.Sprintf(":%d", server.config.ServerPort),
 		Handler: mux,
 	}
 }

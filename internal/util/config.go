@@ -10,8 +10,7 @@ import (
 )
 
 type Config struct {
-	P2PPort    int    `json:"p2p_port"`
-	P2PNetwork string `json:"p2p_network"`
+	ServerPort int `json:"server_port"`
 
 	EncryptionKey string `json:"encryption_key"`
 
@@ -23,12 +22,12 @@ type Config struct {
 	LogLevel string `json:"log_level"`
 	LogFile  string `json:"log_file"`
 
-	TokenRateLimit       string `json:"token_rate_limit"`
-	TokenCleanupInterval string `json:"token_cleanup_interval"`
+	TokenRateLimit            string `json:"token_rate_limit"`
+	TokenCleanupInterval      string `json:"token_cleanup_interval"`
 	ValidationMaxAttempts     int    `json:"validation_max_attempts"`
 	ValidationBlockDuration   string `json:"validation_block_duration"`
 	ValidationCleanupInterval string `json:"validation_cleanup_interval"`
-	OffensiveWordsFile string `json:"offensive_words_file"`
+	OffensiveWordsFile        string `json:"offensive_words_file"`
 }
 
 func DefaultConfig() *Config {
@@ -38,20 +37,19 @@ func DefaultConfig() *Config {
 	}
 
 	return &Config{
-		P2PPort:       8080,
-		P2PNetwork:    "devlink",
+		ServerPort:    8080,
 		DataDir:       filepath.Join(homeDir, ".devlink"),
 		DefaultExpiry: "1h",
 		MaxFileSize:   1024 * 1024,
 		LogLevel:      "info",
 		LogFile:       "",
 
-		TokenRateLimit:       "100ms",
-		TokenCleanupInterval: "24h",
+		TokenRateLimit:            "100ms",
+		TokenCleanupInterval:      "24h",
 		ValidationMaxAttempts:     10,
 		ValidationBlockDuration:   "5m",
 		ValidationCleanupInterval: "1h",
-		OffensiveWordsFile: "",
+		OffensiveWordsFile:        "",
 	}
 }
 
@@ -70,14 +68,10 @@ func LoadConfig() (*Config, error) {
 }
 
 func (c *Config) loadFromEnv() error {
-	if port := os.Getenv("DEVLINK_P2P_PORT"); port != "" {
+	if port := os.Getenv("DEVLINK_SERVER_PORT"); port != "" {
 		if p, err := strconv.Atoi(port); err == nil {
-			c.P2PPort = p
+			c.ServerPort = p
 		}
-	}
-
-	if network := os.Getenv("DEVLINK_P2P_NETWORK"); network != "" {
-		c.P2PNetwork = network
 	}
 
 	if key := os.Getenv("DEVLINK_ENCRYPTION_KEY"); key != "" {
@@ -106,28 +100,28 @@ func (c *Config) loadFromEnv() error {
 		c.LogFile = logFile
 	}
 
-		if tokenRateLimit := os.Getenv("DEVLINK_TOKEN_RATE_LIMIT"); tokenRateLimit != "" {
+	if tokenRateLimit := os.Getenv("DEVLINK_TOKEN_RATE_LIMIT"); tokenRateLimit != "" {
 		c.TokenRateLimit = tokenRateLimit
 	}
-	
+
 	if tokenCleanup := os.Getenv("DEVLINK_TOKEN_CLEANUP_INTERVAL"); tokenCleanup != "" {
 		c.TokenCleanupInterval = tokenCleanup
 	}
-	
+
 	if maxAttempts := os.Getenv("DEVLINK_VALIDATION_MAX_ATTEMPTS"); maxAttempts != "" {
 		if attempts, err := strconv.Atoi(maxAttempts); err == nil {
 			c.ValidationMaxAttempts = attempts
 		}
 	}
-	
+
 	if blockDuration := os.Getenv("DEVLINK_VALIDATION_BLOCK_DURATION"); blockDuration != "" {
 		c.ValidationBlockDuration = blockDuration
 	}
-	
+
 	if validationCleanup := os.Getenv("DEVLINK_VALIDATION_CLEANUP_INTERVAL"); validationCleanup != "" {
 		c.ValidationCleanupInterval = validationCleanup
 	}
-	
+
 	if offensiveWordsFile := os.Getenv("DEVLINK_OFFENSIVE_WORDS_FILE"); offensiveWordsFile != "" {
 		c.OffensiveWordsFile = offensiveWordsFile
 	}
@@ -136,12 +130,8 @@ func (c *Config) loadFromEnv() error {
 }
 
 func (c *Config) validate() error {
-	if c.P2PPort < 1 || c.P2PPort > 65535 {
-		return fmt.Errorf("invalid P2P port: %d (must be between 1-65535)", c.P2PPort)
-	}
-
-	if c.P2PNetwork == "" {
-		return fmt.Errorf("P2P network name cannot be empty")
+	if c.ServerPort < 1 || c.ServerPort > 65535 {
+		return fmt.Errorf("invalid server port: %d (must be between 1-65535)", c.ServerPort)
 	}
 
 	if c.DataDir == "" {
@@ -166,22 +156,22 @@ func (c *Config) validate() error {
 		return fmt.Errorf("invalid log level: %s", c.LogLevel)
 	}
 
-		if _, err := time.ParseDuration(c.TokenRateLimit); err != nil {
+	if _, err := time.ParseDuration(c.TokenRateLimit); err != nil {
 		return fmt.Errorf("invalid token rate limit format: %s", c.TokenRateLimit)
 	}
-	
+
 	if _, err := time.ParseDuration(c.TokenCleanupInterval); err != nil {
 		return fmt.Errorf("invalid token cleanup interval format: %s", c.TokenCleanupInterval)
 	}
-	
+
 	if c.ValidationMaxAttempts <= 0 {
 		return fmt.Errorf("validation max attempts must be positive")
 	}
-	
+
 	if _, err := time.ParseDuration(c.ValidationBlockDuration); err != nil {
 		return fmt.Errorf("invalid validation block duration format: %s", c.ValidationBlockDuration)
 	}
-	
+
 	if _, err := time.ParseDuration(c.ValidationCleanupInterval); err != nil {
 		return fmt.Errorf("invalid validation cleanup interval format: %s", c.ValidationCleanupInterval)
 	}

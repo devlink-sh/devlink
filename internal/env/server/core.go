@@ -25,7 +25,7 @@ func NewServer(config *util.Config) (*Server, error) {
 
 // Start starts the HTTP server
 func (s *Server) Start() error {
-	fmt.Printf("🚀 Starting DevLink server on port %d\n", s.config.P2PPort)
+	fmt.Printf("🚀 Starting DevLink server on port %d\n", s.config.ServerPort)
 	go s.startCleanupRoutine()
 	return s.server.ListenAndServe()
 }

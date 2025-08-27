@@ -33,10 +33,19 @@ Thumbs.db
 *.log
 logs/
 
-# Environment files
+# Environment files - MAIN FOCUS
 .env
 .env.local
 .env.*.local
+.env.development
+.env.production
+.env.test
+.env.staging
+.env.backup
+.env.old
+.env.example
+.env.template
+.env.sample
 
 # Temporary files
 tmp/
@@ -51,12 +60,19 @@ dist/
 coverage.txt
 coverage.html
 
-# Secrets
+# Secrets and keys
 config.yaml
 config.yml
 *.key
 *.pem
 *.crt
+*.p12
+*.pfx
 
 # Data directory
 .devlink/
+
+# Backup files
+*.bak
+*.backup
+*.orig

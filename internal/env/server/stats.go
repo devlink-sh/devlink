@@ -25,7 +25,7 @@ func (s *Server) GetStats() map[string]interface{} {
 		"active_shares":    activeShares,
 		"expired_shares":   expiredShares,
 		"total_accesses":   totalAccesses,
-		"server_port":      s.config.P2PPort,
+		"server_port":      s.config.ServerPort,
 		"encryption_ready": s.encryption != nil,
 	}
 }
