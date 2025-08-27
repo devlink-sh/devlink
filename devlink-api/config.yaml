@@ -1,0 +1,4 @@
+ziti:
+  controller: "https://localhost:1280"
+  username: "admin"
+  password: "admin"
