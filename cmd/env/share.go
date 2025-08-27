@@ -2,9 +2,9 @@ package env
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 
+	"github.com/devlink/internal/env"
+	"github.com/devlink/internal/util"
 	"github.com/spf13/cobra"
 )
 
@@ -28,8 +28,21 @@ Examples:
 func runShare(cmd *cobra.Command, args []string) error {
 	filePath := args[0]
 
-	if err := validateFile(filePath); err != nil {
-		return fmt.Errorf("❌ %w", err)
+	parser := env.NewParser()
+	envFile, err := parser.ParseFile(filePath)
+	if err != nil {
+		return fmt.Errorf("❌ failed to parse file: %w", err)
+	}
+
+	validator := env.NewValidator()
+	validationResult := validator.Validate(envFile)
+
+	if !validationResult.IsValid {
+		fmt.Println("⚠️  Security issues detected:")
+		for _, err := range validationResult.Errors {
+			fmt.Printf("   • %s: %s\n", err.Variable, err.Message)
+		}
+		fmt.Println()
 	}
 
 	expiry, _ := cmd.Flags().GetString("expiry")
@@ -41,27 +54,19 @@ func runShare(cmd *cobra.Command, args []string) error {
 		fmt.Println("🔒 Read-only: enabled")
 	}
 
+	fmt.Printf("📊 File stats: %d variables, %d sensitive\n",
+		len(envFile.Variables), len(validationResult.SensitiveVars))
+
+	tokenGen := util.NewTokenGenerator()
+	shareCode, err := tokenGen.GenerateShareCode()
+	if err != nil {
+		return fmt.Errorf("❌ failed to generate share code: %w", err)
+	}
+
 	fmt.Println("\n✨ Share created successfully!")
 	fmt.Println("📋 Share this code with your team:")
-	fmt.Printf("   %s\n", "ABC123")
-	fmt.Println("\n💡 Use: devlink env get ABC123")
-
-	return nil
-}
-
-func validateFile(filePath string) error {
-	absPath, err := filepath.Abs(filePath)
-	if err != nil {
-		return fmt.Errorf("invalid file path: %w", err)
-	}
-
-	if _, err := os.Stat(absPath); os.IsNotExist(err) {
-		return fmt.Errorf("file not found: %s", filePath)
-	}
-
-	if _, err := os.ReadFile(absPath); err != nil {
-		return fmt.Errorf("cannot read file: %w", err)
-	}
+	fmt.Printf("   %s\n", shareCode)
+	fmt.Printf("\n💡 Use: devlink env get %s\n", shareCode)
 
 	return nil
 }

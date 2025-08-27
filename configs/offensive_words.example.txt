@@ -1,0 +1,37 @@
+# Example offensive words configuration for DevLink
+# This file contains words that should not be allowed in share codes
+# 
+# Guidelines:
+# - One word per line
+# - Lines starting with # are comments and ignored
+# - Words are case-insensitive
+# - Empty lines are ignored
+# - Maximum 10,000 words supported
+# - Maximum 50 characters per word
+#
+# To use this file, set the environment variable:
+# export DEVLINK_OFFENSIVE_WORDS_FILE=/path/to/your/offensive_words.txt
+
+# Inappropriate content
+bad
+evil
+hate
+kill
+dead
+die
+hell
+damn
+
+# Common test/demo words (optional - prevents predictable codes)
+test
+demo
+temp
+fake
+invalid
+null
+undefined
+placeholder
+
+# Add your custom words here
+# customword1
+# customword2

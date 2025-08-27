@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/devlink/internal/env"
+	"github.com/devlink/internal/util"
 	"github.com/spf13/cobra"
 )
 
@@ -30,7 +32,8 @@ func runGet(cmd *cobra.Command, args []string) error {
 	shareCode := args[0]
 	outputFile, _ := cmd.Flags().GetString("output")
 
-	if err := validateShareCode(shareCode); err != nil {
+	validationManager := util.NewValidationManager()
+	if err := validationManager.ValidateShareCode(shareCode, "cli-client"); err != nil {
 		return fmt.Errorf("❌ %w", err)
 	}
 
@@ -42,10 +45,33 @@ func runGet(cmd *cobra.Command, args []string) error {
 
 	fmt.Printf("🔍 Retrieving: %s\n", shareCode)
 
-	content := `DATABASE_URL=postgresql://localhost:5432/mydb
-API_KEY=your-secret-key
-REDIS_URL=redis://localhost:6379
-NODE_ENV=development`
+	content := os.Getenv("DEVLINK_SAMPLE_CONTENT")
+	if content == "" {
+		content = `# Sample environment file
+NODE_ENV=development
+DEBUG=false
+LOG_LEVEL=info
+PORT=3000`
+	}
+
+	parser := env.NewParser()
+	envFile, err := parser.ParseContent(content, "retrieved")
+	if err != nil {
+		return fmt.Errorf("❌ failed to parse content: %w", err)
+	}
+
+	formatter := env.NewFormatter()
+	formatOptions := &util.FormatOptions{
+		MaskSensitive:   true,
+		ShowComments:    true,
+		ShowLineNumbers: false,
+		OutputFormat:    "text",
+	}
+
+	formattedOutput, err := formatter.Format(envFile, formatOptions)
+	if err != nil {
+		return fmt.Errorf("❌ failed to format output: %w", err)
+	}
 
 	if outputFile != "" {
 		fmt.Printf("💾 Saving to: %s\n", outputFile)
@@ -56,32 +82,18 @@ NODE_ENV=development`
 	} else {
 		fmt.Println("\n📄 Environment file content:")
 		fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-		fmt.Println(content)
+		fmt.Println(formattedOutput)
 		fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 	}
 
 	return nil
 }
 
-func validateShareCode(code string) error {
-	if code == "" {
-		return fmt.Errorf("share code cannot be empty")
-	}
-
-	if len(code) < 3 {
-		return fmt.Errorf("share code must be at least 3 characters")
-	}
-
-	for _, char := range code {
-		if !((char >= 'A' && char <= 'Z') || (char >= '0' && char <= '9')) {
-			return fmt.Errorf("share code must contain only uppercase letters and numbers")
-		}
-	}
-
-	return nil
-}
-
 func validateOutputFile(filePath string) error {
+	if err := validateOutputPath(filePath); err != nil {
+		return fmt.Errorf("invalid output path: %w", err)
+	}
+
 	dir := filepath.Dir(filePath)
 	if dir != "." {
 		if _, err := os.Stat(dir); os.IsNotExist(err) {
@@ -98,15 +110,55 @@ func validateOutputFile(filePath string) error {
 	return nil
 }
 
+// validateOutputPath validates the output file path for security
+func validateOutputPath(filePath string) error {
+	if filePath == "" {
+		return fmt.Errorf("file path cannot be empty")
+	}
+
+	// Get absolute path
+	absPath, err := filepath.Abs(filePath)
+	if err != nil {
+		return fmt.Errorf("invalid file path: %w", err)
+	}
+
+	// Prevent path traversal attacks
+	if strings.Contains(absPath, "..") {
+		return fmt.Errorf("path traversal not allowed")
+	}
+
+	// Restrict to current directory and subdirectories
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("cannot determine current directory: %w", err)
+	}
+
+	if !strings.HasPrefix(absPath, currentDir) {
+		return fmt.Errorf("output path must be within current directory")
+	}
+
+	// Check for dangerous file extensions
+	dangerousExts := []string{".exe", ".bat", ".sh", ".py", ".js", ".php"}
+	ext := strings.ToLower(filepath.Ext(filePath))
+	for _, dangerousExt := range dangerousExts {
+		if ext == dangerousExt {
+			return fmt.Errorf("dangerous file extension not allowed: %s", ext)
+		}
+	}
+
+	return nil
+}
+
 func writeToFile(filePath, content string) error {
 	dir := filepath.Dir(filePath)
 	if dir != "." {
-		if err := os.MkdirAll(dir, 0755); err != nil {
+		if err := os.MkdirAll(dir, 0750); err != nil {
 			return fmt.Errorf("failed to create directory: %w", err)
 		}
 	}
 
-	if err := os.WriteFile(filePath, []byte(strings.TrimSpace(content)), 0644); err != nil {
+	// Use secure permissions (owner read/write only)
+	if err := os.WriteFile(filePath, []byte(strings.TrimSpace(content)), 0600); err != nil {
 		return fmt.Errorf("failed to write file: %w", err)
 	}
 

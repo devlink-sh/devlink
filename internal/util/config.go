@@ -22,6 +22,13 @@ type Config struct {
 
 	LogLevel string `json:"log_level"`
 	LogFile  string `json:"log_file"`
+
+	TokenRateLimit       string `json:"token_rate_limit"`
+	TokenCleanupInterval string `json:"token_cleanup_interval"`
+	ValidationMaxAttempts     int    `json:"validation_max_attempts"`
+	ValidationBlockDuration   string `json:"validation_block_duration"`
+	ValidationCleanupInterval string `json:"validation_cleanup_interval"`
+	OffensiveWordsFile string `json:"offensive_words_file"`
 }
 
 func DefaultConfig() *Config {
@@ -38,6 +45,13 @@ func DefaultConfig() *Config {
 		MaxFileSize:   1024 * 1024,
 		LogLevel:      "info",
 		LogFile:       "",
+
+		TokenRateLimit:       "100ms",
+		TokenCleanupInterval: "24h",
+		ValidationMaxAttempts:     10,
+		ValidationBlockDuration:   "5m",
+		ValidationCleanupInterval: "1h",
+		OffensiveWordsFile: "",
 	}
 }
 
@@ -92,6 +106,32 @@ func (c *Config) loadFromEnv() error {
 		c.LogFile = logFile
 	}
 
+		if tokenRateLimit := os.Getenv("DEVLINK_TOKEN_RATE_LIMIT"); tokenRateLimit != "" {
+		c.TokenRateLimit = tokenRateLimit
+	}
+	
+	if tokenCleanup := os.Getenv("DEVLINK_TOKEN_CLEANUP_INTERVAL"); tokenCleanup != "" {
+		c.TokenCleanupInterval = tokenCleanup
+	}
+	
+	if maxAttempts := os.Getenv("DEVLINK_VALIDATION_MAX_ATTEMPTS"); maxAttempts != "" {
+		if attempts, err := strconv.Atoi(maxAttempts); err == nil {
+			c.ValidationMaxAttempts = attempts
+		}
+	}
+	
+	if blockDuration := os.Getenv("DEVLINK_VALIDATION_BLOCK_DURATION"); blockDuration != "" {
+		c.ValidationBlockDuration = blockDuration
+	}
+	
+	if validationCleanup := os.Getenv("DEVLINK_VALIDATION_CLEANUP_INTERVAL"); validationCleanup != "" {
+		c.ValidationCleanupInterval = validationCleanup
+	}
+	
+	if offensiveWordsFile := os.Getenv("DEVLINK_OFFENSIVE_WORDS_FILE"); offensiveWordsFile != "" {
+		c.OffensiveWordsFile = offensiveWordsFile
+	}
+
 	return nil
 }
 
@@ -126,6 +166,26 @@ func (c *Config) validate() error {
 		return fmt.Errorf("invalid log level: %s", c.LogLevel)
 	}
 
+		if _, err := time.ParseDuration(c.TokenRateLimit); err != nil {
+		return fmt.Errorf("invalid token rate limit format: %s", c.TokenRateLimit)
+	}
+	
+	if _, err := time.ParseDuration(c.TokenCleanupInterval); err != nil {
+		return fmt.Errorf("invalid token cleanup interval format: %s", c.TokenCleanupInterval)
+	}
+	
+	if c.ValidationMaxAttempts <= 0 {
+		return fmt.Errorf("validation max attempts must be positive")
+	}
+	
+	if _, err := time.ParseDuration(c.ValidationBlockDuration); err != nil {
+		return fmt.Errorf("invalid validation block duration format: %s", c.ValidationBlockDuration)
+	}
+	
+	if _, err := time.ParseDuration(c.ValidationCleanupInterval); err != nil {
+		return fmt.Errorf("invalid validation cleanup interval format: %s", c.ValidationCleanupInterval)
+	}
+
 	return nil
 }
 
@@ -147,5 +207,25 @@ func (c *Config) GetMaxFileSize() int64 {
 
 func (c *Config) GetDefaultExpiry() time.Duration {
 	duration, _ := time.ParseDuration(c.DefaultExpiry)
+	return duration
+}
+
+func (c *Config) GetTokenRateLimit() time.Duration {
+	duration, _ := time.ParseDuration(c.TokenRateLimit)
+	return duration
+}
+
+func (c *Config) GetTokenCleanupInterval() time.Duration {
+	duration, _ := time.ParseDuration(c.TokenCleanupInterval)
+	return duration
+}
+
+func (c *Config) GetValidationBlockDuration() time.Duration {
+	duration, _ := time.ParseDuration(c.ValidationBlockDuration)
+	return duration
+}
+
+func (c *Config) GetValidationCleanupInterval() time.Duration {
+	duration, _ := time.ParseDuration(c.ValidationCleanupInterval)
 	return duration
 }
