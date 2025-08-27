@@ -23,4 +23,8 @@ Examples:
 func init() {
 	EnvCmd.AddCommand(shareCmd)
 	EnvCmd.AddCommand(getCmd)
+	EnvCmd.AddCommand(templateCmd)
+	EnvCmd.AddCommand(bulkCmd)
+	EnvCmd.AddCommand(searchCmd)
+	EnvCmd.AddCommand(completionCmd)
 }
