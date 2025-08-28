@@ -18,15 +18,16 @@ type AppContext struct {
 type appContextKey struct{}
 
 
-func AttachAppContext(cmd *cobra.Command) error {
+func AttachAppContext(cmd *cobra.Command, args []string) error {
+	if cmd.Name() == "init"{
+		return nil;
+	}
+	
 	identityPath, _ := cmd.Flags().GetString("identity")
+	
 
 	if identityPath == "" {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return fmt.Errorf("error getting home directory: %v", err)
-		}
-		identityPath = filepath.Join(home, ".devlink", "identity.json")
+		identityPath = filepath.Join(".", "identity.json")
 
 		if _, err := os.Stat(identityPath); os.IsNotExist(err) {
 			return errors.New("identity file not found. please run 'devlink init <invitation-token>' to configure your environment")

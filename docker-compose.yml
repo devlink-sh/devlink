@@ -1,27 +1,12 @@
-version: '3.8'
-
 services:
   ziti-controller:
     image: openziti/ziti-controller:latest
+    container_name: ziti-controller
     ports:
       - "1280:1280"
       - "8440:8440"
     environment:
-      - ZITI_CTRL_ADVERTISED_ADDRESS=localhost
-      - ZITI_CTRL_ADVERTISED_PORT=1280
-      - ZITI_CTRL_BIND_ADDRESS=0.0.0.0
-      - ZITI_PWD=admin
-      - ZITI_USER=admin
-    volumes:
-      - ziti_data:/var/openziti
-    command: >
-      sh -c "
-        if [ ! -f /var/openziti/ctrl.yaml ]; then
-          echo 'Initializing Ziti controller...'
-          ziti controller create config --output /var/openziti/ctrl.yaml
-        fi
-        ziti controller run /var/openziti/ctrl.yaml
-      "
-
-volumes:
-  ziti_data:
+      ZITI_CTRL_ADVERTISED_ADDRESS: "localhost"
+      ZITI_CTRL_ADVERTISED_PORT: "1280"
+      ZITI_PWD: "admin"
+      ZITI_USER: "admin"

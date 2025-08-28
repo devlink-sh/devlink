@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/x509"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,10 +12,11 @@ import (
 	"sync"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/openziti/edge-api/rest_management_api_client"
 	"github.com/openziti/edge-api/rest_management_api_client/enrollment"
 	"github.com/openziti/edge-api/rest_management_api_client/identity"
+	"github.com/openziti/edge-api/rest_management_api_client/service"
+	"github.com/openziti/edge-api/rest_management_api_client/service_policy"
 	"github.com/openziti/edge-api/rest_model"
 	"github.com/openziti/edge-api/rest_util"
 	"github.com/spf13/viper"
@@ -27,7 +29,6 @@ var (
 )
 
 func main() {
-
 	if err := loadConfig(); err != nil {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
@@ -41,14 +42,143 @@ func main() {
 	}
 
 	app := gin.New()
-
 	app.POST("/api/v1/provision", provisionHandler)
+	app.POST("/api/v1/create-service", createServiceHandler)
 
 	fmt.Println("DevLink API server starting on :8080...")
 	if err := app.Run(":8080"); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
+}
 
+func createServiceHandler(c *gin.Context) {
+	if c.Request.Method != http.MethodPost {
+		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Invalid request method"})
+		return
+	}
+
+	var req struct {
+		Name string `json:"name"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+	if req.Name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Service name is required"})
+		return
+	}
+
+	ctx := context.Background()
+
+	// Check if service already exists
+	listParams := &service.ListServicesParams{Context: ctx}
+	listResp, err := zitiAPIClient.Service.ListServices(listParams, nil)
+	if err == nil {
+		for _, s := range listResp.Payload.Data {
+			if s.Name != nil && *s.Name == req.Name {
+				c.JSON(http.StatusOK, gin.H{"message": "service already exists", "id": s.ID})
+				return
+			}
+		}
+	} else {
+		log.Printf("Error listing services: %v", err)
+	}
+
+	encRequired := false
+	serviceCreate := &rest_model.ServiceCreate{
+		Name:               &req.Name,
+		EncryptionRequired: &encRequired,
+	}
+	createParams := &service.CreateServiceParams{
+		Service: serviceCreate,
+		Context: ctx,
+	}
+
+	createResp, err := zitiAPIClient.Service.CreateService(createParams, nil)
+	if err != nil {
+		switch e := err.(type) {
+		case *service.CreateServiceBadRequest:
+			b, jerr := json.MarshalIndent(e.Payload, "", "  ")
+			if jerr != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "bad request creating service"})
+				return
+			}
+			c.Data(http.StatusBadRequest, "application/json", b)
+			return
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create service", "details": err.Error()})
+			return
+		}
+	}
+
+	// ✅ Attach the devlink identity (from ./identity.json) to this service
+	identityName := "devlink" // must match the one in provisionHandler/init.go
+
+	// --- Bind policy ---
+	bindPolicyName := req.Name + "-bind-policy"
+	bindType := rest_model.DialBindBind
+	semantic := rest_model.NewSemantic("AllOf")
+	bindPolicy := &rest_model.ServicePolicyCreate{
+		Name:          &bindPolicyName,
+		Type:          &bindType,
+		Semantic:      semantic,
+		ServiceRoles:  []string{"#devlink-service"},
+		IdentityRoles: []string{"#devlink"},
+	}
+
+	bindParams := &service_policy.CreateServicePolicyParams{
+		Policy:  bindPolicy, // field is Policy in your SDK
+		Context: ctx,
+	}
+
+	_, err = zitiAPIClient.ServicePolicy.CreateServicePolicy(bindParams, nil)
+	if err != nil {
+		if apiErr, ok := err.(*service_policy.CreateServicePolicyBadRequest); ok {
+			if apiErr.Payload != nil && apiErr.Payload.Error != nil {
+				log.Printf("❌ Controller rejected Bind policy: %s", apiErr.Payload.Error.Message)
+			} else {
+				log.Printf("❌ Controller rejected Bind policy with 400: %+v", apiErr)
+			}
+		} else {
+			log.Printf("⚠️ Failed to attach Bind policy: %v", err)
+		}
+	} else {
+		log.Printf("✅ Attached Bind policy: %s → %s", identityName, req.Name)
+	}
+
+	// --- Dial policy ---
+	dialPolicyName := req.Name + "-dial-policy"
+	dialType := rest_model.DialBindDial
+	dialPolicy := &rest_model.ServicePolicyCreate{
+		Name:          &dialPolicyName,
+		Type:          &dialType,
+		Semantic:      semantic,
+		ServiceRoles:  []string{"#devlink-service"},
+		IdentityRoles: []string{"#devlink"},
+	}
+
+	dialParams := &service_policy.CreateServicePolicyParams{
+		Policy:  dialPolicy,
+		Context: ctx,
+	}
+
+	_, err = zitiAPIClient.ServicePolicy.CreateServicePolicy(dialParams, nil)
+	if err != nil {
+		if apiErr, ok := err.(*service_policy.CreateServicePolicyBadRequest); ok {
+			if apiErr.Payload != nil && apiErr.Payload.Error != nil {
+				log.Printf("❌ Controller rejected Bind policy: %s", apiErr.Payload.Error.Message)
+			} else {
+				log.Printf("❌ Controller rejected Bind policy with 400: %+v", apiErr)
+			}
+		} else {
+			log.Printf("⚠️ Failed to attach Bind policy: %v", err)
+		}
+	} else {
+		log.Printf("✅ Attached Dial policy: %s → %s", identityName, req.Name)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "service created", "id": createResp.Payload.Data.ID})
 }
 
 func provisionHandler(c *gin.Context) {
@@ -57,7 +187,6 @@ func provisionHandler(c *gin.Context) {
 		return
 	}
 
-	// Decode the incoming request
 	var req struct {
 		Token string `json:"token"`
 	}
@@ -66,18 +195,12 @@ func provisionHandler(c *gin.Context) {
 		return
 	}
 
-	// Check if the invitation token is valid and use it up.
 	if !useInvitationToken(req.Token) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or used invitation token"})
 		return
 	}
 
-	// The token is valid, so create a new identity in OpenZiti.
-	// We'll give the identity a unique name.
-	identityName := "devlink-user-" + uuid.New().String()
-
-	// This is the API call to create the identity.
-	// We specify `enrollment: { "ott": true }` to get a one-time token.
+	identityName := "devlink" // fixed identity for local dev
 	isAdmin := false
 	createIdentityParams := &identity.CreateIdentityParams{
 		Identity: &rest_model.IdentityCreate{
@@ -86,7 +209,7 @@ func provisionHandler(c *gin.Context) {
 			},
 			IsAdmin: &isAdmin,
 			Name:    &identityName,
-			Type:    rest_model.NewIdentityType("Device"), // Or "User"
+			Type:    rest_model.NewIdentityType("Device"),
 		},
 		Context: context.Background(),
 	}
@@ -100,39 +223,29 @@ func provisionHandler(c *gin.Context) {
 
 	log.Printf("Created identity with ID: %s", resp.Payload.Data.ID)
 
-	// List all enrollments and find the one for our identity
+	// same enrollment logic...
 	enrollmentParams := &enrollment.ListEnrollmentsParams{
 		Context: context.Background(),
 	}
 	enrollments, err := zitiAPIClient.Enrollment.ListEnrollments(enrollmentParams, nil)
 	if err != nil {
-		log.Printf("Error retrieving enrollments: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve enrollment token"})
 		return
 	}
 
-	// Find the enrollment for our identity
 	var enrollmentID *string
 	for _, enroll := range enrollments.Payload.Data {
-		log.Printf("Checking enrollment ID: %s, Identity: %v, Token: %v",
-			*enroll.ID,
-			enroll.Identity,
-			enroll.Token != nil)
-
 		if enroll.Identity != nil && enroll.Identity.ID == resp.Payload.Data.ID {
 			enrollmentID = enroll.ID
-			log.Printf("Found matching enrollment ID for identity %s: %s", resp.Payload.Data.ID, *enrollmentID)
 			break
 		}
 	}
 
 	if enrollmentID == nil {
-		log.Printf("No enrollment found for identity %s", resp.Payload.Data.ID)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve enrollment token"})
 		return
 	}
 
-	// Now get the enrollment details to fetch the actual JWT
 	enrollmentDetailParams := &enrollment.DetailEnrollmentParams{
 		ID:      *enrollmentID,
 		Context: context.Background(),
@@ -140,22 +253,18 @@ func provisionHandler(c *gin.Context) {
 
 	enrollmentDetail, err := zitiAPIClient.Enrollment.DetailEnrollment(enrollmentDetailParams, nil)
 	if err != nil {
-		log.Printf("Error retrieving enrollment detail for ID %s: %v", *enrollmentID, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve enrollment token"})
 		return
 	}
 
 	if enrollmentDetail.Payload.Data.JWT == "" {
-		log.Printf("No JWT found in enrollment detail for ID %s", *enrollmentID)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve enrollment JWT"})
 		return
 	}
 
-	log.Printf("Sending enrollment JWT: %s", enrollmentDetail.Payload.Data.JWT)
 	c.Header("Content-Type", "application/jwt")
 	c.String(http.StatusOK, enrollmentDetail.Payload.Data.JWT)
-
-	log.Printf("Successfully provisioned identity '%s'", identityName)
+	log.Printf("Provisioned identity '%s'", identityName)
 }
 
 func loadConfig() error {
@@ -189,7 +298,7 @@ func useInvitationToken(token string) bool {
 	defer tokensMutex.Unlock()
 
 	if validTokens[token] {
-		delete(validTokens, token) // Token is now used up
+		delete(validTokens, token)
 		return true
 	}
 	return false
@@ -200,7 +309,6 @@ func initializeZitiClient() error {
 	username := viper.GetString("ziti.username")
 	password := viper.GetString("ziti.password")
 
-	// Trust the controller's CA
 	caPool := x509.NewCertPool()
 	caCerts, err := rest_util.GetControllerWellKnownCas(ctrlAddress)
 	if err != nil {
@@ -210,7 +318,6 @@ func initializeZitiClient() error {
 		caPool.AddCert(ca)
 	}
 
-	// Authenticate and create a management client
 	client, err := rest_util.NewEdgeManagementClientWithUpdb(username, password, ctrlAddress, caPool)
 	if err != nil {
 		return fmt.Errorf("failed to create management client: %w", err)

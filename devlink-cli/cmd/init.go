@@ -50,11 +50,7 @@ var initCmd = &cobra.Command{
 			return fmt.Errorf("failed to marshal config to JSON: %w", err)
 		}
 
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return err
-		}
-		identityPath := filepath.Join(home, ".devlink", "identity.json")
+		identityPath := filepath.Join(".", "identity.json")
 
 		// Create the.devlink directory if it doesn't exist
 		if err := os.MkdirAll(filepath.Dir(identityPath), 0700); err != nil {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/devlink/internal/ziti"
 	"github.com/spf13/cobra"
 )
 
@@ -26,10 +27,7 @@ DevLink is a comprehensive CLI tool designed to streamline development workflows
 by providing efficient link management, project organization, and developer utilities.
 
 Use 'devlink help' to see available commands.`, banner),
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Print(banner)
-		fmt.Println("\nWelcome to DevLink! Use 'devlink help' to get started.")
-	},
+	PersistentPreRunE: ziti.AttachAppContext,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
