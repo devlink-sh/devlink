@@ -11,6 +11,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/devlink/devlink-api/util"
 	"github.com/gin-gonic/gin"
 	"github.com/openziti/edge-api/rest_management_api_client"
 	"github.com/openziti/edge-api/rest_management_api_client/enrollment"
@@ -200,7 +201,7 @@ func provisionHandler(c *gin.Context) {
 		return
 	}
 
-	identityName := "devlink" // fixed identity for local dev
+	identityName := "devlink-user-" + util.GenerateHumanCode() // fixed identity for local dev
 	isAdmin := false
 	createIdentityParams := &identity.CreateIdentityParams{
 		Identity: &rest_model.IdentityCreate{
@@ -221,7 +222,27 @@ func provisionHandler(c *gin.Context) {
 		return
 	}
 
-	log.Printf("Created identity with ID: %s", resp.Payload.Data.ID)
+	identityId := resp.Payload.Data.ID
+
+	log.Printf("Created identity with ID: %s", identityId)
+
+	roleAttributes := rest_model.Attributes{"#devlink-sharers", "#devlink-listeners"}
+
+	updateIdentityParams := &identity.UpdateIdentityParams{
+		ID: identityId,
+		Identity: &rest_model.IdentityUpdate{
+			RoleAttributes: &roleAttributes,
+		},
+		Context: context.Background(),
+	}
+	_, err = zitiAPIClient.Identity.UpdateIdentity(updateIdentityParams, nil)
+	if err != nil {
+		log.Printf("Error assigning roles to identity %s: %v", identityId, err)
+		// c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to assign roles to identity"})
+		// return
+	}
+	log.Printf("Assigned roles to identity '%s'", identityName)
+	
 
 	// same enrollment logic...
 	enrollmentParams := &enrollment.ListEnrollmentsParams{
@@ -235,8 +256,9 @@ func provisionHandler(c *gin.Context) {
 
 	var enrollmentID *string
 	for _, enroll := range enrollments.Payload.Data {
-		if enroll.Identity != nil && enroll.Identity.ID == resp.Payload.Data.ID {
+		if enroll.Identity != nil && enroll.Identity.ID == identityId {
 			enrollmentID = enroll.ID
+
 			break
 		}
 	}

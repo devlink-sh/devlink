@@ -13,6 +13,7 @@ import (
 
 	"github.com/devlink/internal/proxy"
 	"github.com/devlink/internal/ziti"
+	"github.com/devlink/util"
 	"github.com/openziti/sdk-golang/ziti/edge"
 
 	// "github.com/devlink/util"
@@ -46,18 +47,18 @@ var dbShareCmd = &cobra.Command{
 		dbType, _ := cmd.Flags().GetString("type")
 		dbPort, _ := cmd.Flags().GetInt("port")
 
-		serviceName := "devlink-service"
-		if err := createService(serviceName); err != nil {
-			return fmt.Errorf("failed to create service: %w", err)
-		}
-		log.Println("Service created successfully:", serviceName)
+		serviceName := util.GenerateHumanCode()
+		// if err := createService(serviceName); err != nil {
+		// 	return fmt.Errorf("failed to create service: %w", err)
+		// }
+		// log.Println("Service created successfully:", serviceName)
 
 		// The controller may take a short moment to propagate the new service to the data-plane.
 		// Retry Listen with backoff for a few seconds before giving up.
 		var listener edge.Listener
 		var err error
 		for i := 0; i < 5; i++ {
-			listener, err = appCtx.ZitiContext.Listen("devlink-service")
+			listener, err = appCtx.ZitiContext.Listen(serviceName)
 			if err == nil {
 				break
 			}
