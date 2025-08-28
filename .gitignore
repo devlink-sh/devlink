@@ -1,26 +1,46 @@
-# Go binaries
+# =============================================================================
+# DevLink - Secure Environment File Sharing Tool
+# =============================================================================
+
+# =============================================================================
+# Go Language Files
+# =============================================================================
+
+# Binary files
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
 devlink
+devlink.exe
 
-# Go test files
+# Test files
 *.test
 *.out
+*.prof
 
 # Go workspace
 go.work
 
-# IDE files
+# Go modules
+go.sum
+
+# =============================================================================
+# Development Environment
+# =============================================================================
+
+# IDE and Editor files
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
 
-# OS files
+# OS generated files
 .DS_Store
 .DS_Store?
 ._*
@@ -28,12 +48,13 @@ go.work
 .Trashes
 ehthumbs.db
 Thumbs.db
+desktop.ini
 
-# Logs
-*.log
-logs/
+# =============================================================================
+# Environment Files - CRITICAL SECURITY
+# =============================================================================
 
-# Environment files - MAIN FOCUS
+# Never commit environment files - they contain secrets!
 .env
 .env.local
 .env.*.local
@@ -46,33 +67,193 @@ logs/
 .env.example
 .env.template
 .env.sample
+.env.tmp
+.env.temp
 
-# Temporary files
-tmp/
-temp/
-*.tmp
+# Test environment files
+test.env
+test-*.env
+sample.env
+demo.env
 
-# Build artifacts
-build/
-dist/
+# =============================================================================
+# DevLink Specific Files
+# =============================================================================
 
-# Coverage reports
-coverage.txt
-coverage.html
+# DevLink data directory (contains identities and shares)
+.devlink/
+~/.devlink/
 
-# Secrets and keys
+# OpenZiti identity files
+*.jwt
+identity.json
+identity.yaml
+identity.yml
+
+# DevLink configuration
+devlink.yaml
+devlink.yml
+devlink.json
+devlink.config
+
+# =============================================================================
+# Security and Secrets
+# =============================================================================
+
+# Configuration files that might contain secrets
 config.yaml
 config.yml
+config.json
+*.config
+*.conf
+
+# Certificate and key files
 *.key
 *.pem
 *.crt
+*.csr
 *.p12
 *.pfx
+*.jks
+*.keystore
 
-# Data directory
-.devlink/
+# API keys and tokens
+*.token
+*.secret
+secrets/
+keys/
+
+# =============================================================================
+# Build and Distribution
+# =============================================================================
+
+# Build directories
+build/
+dist/
+bin/
+out/
+
+# Temporary build files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# =============================================================================
+# Logs and Debugging
+# =============================================================================
+
+# Log files
+*.log
+logs/
+log/
+
+# Debug files
+debug/
+*.debug
+
+# =============================================================================
+# Testing and Coverage
+# =============================================================================
+
+# Test coverage reports
+coverage.txt
+coverage.html
+coverage.xml
+*.cover
+*.out
+
+# Test artifacts
+test-results/
+test-output/
+
+# =============================================================================
+# Backup and Archive Files
+# =============================================================================
 
 # Backup files
 *.bak
 *.backup
 *.orig
+*.old
+*.save
+
+# Archive files
+*.tar
+*.tar.gz
+*.zip
+*.rar
+*.7z
+
+# =============================================================================
+# Documentation Build
+# =============================================================================
+
+# Generated documentation
+docs/build/
+docs/_build/
+site/
+
+# =============================================================================
+# Dependencies and Package Managers
+# =============================================================================
+
+# Node.js (if any frontend components)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python (if any scripts)
+__pycache__/
+*.py[cod]
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# =============================================================================
+# Docker and Containerization
+# =============================================================================
+
+# Docker files
+Dockerfile.dev
+docker-compose.override.yml
+.dockerignore
+
+# =============================================================================
+# CI/CD and Deployment
+# =============================================================================
+
+# CI/CD files
+.github/workflows/*.yml
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# Deployment files
+deploy/
+deployment/
+
+# =============================================================================
+# Local Development
+# =============================================================================
+
+# Local development files
+local/
+dev/
+development/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Cache directories
+.cache/
+cache/
+
+# =============================================================================
+# End of .gitignore
+# =============================================================================

@@ -1,159 +1,127 @@
-# DevLink
+# DevLink 🔐
 
-A CLI tool for development workflow management with smart features for environment file sharing.
+> **"Sharing secrets safely, one .env file at a time!"** 🚀
 
-## Installation
+Ever tried to share your environment variables with a teammate and thought, *"Hmm, maybe I shouldn't paste this API key in Slack..."*? 
 
+Well, worry no more! DevLink is here to save the day with **zero-trust networking** that makes sharing .env files as safe as passing a secret note through an invisible, encrypted tunnel. ✨
+
+## 🌟 What Makes DevLink Special?
+
+- 🔐 **Zero-trust networking** - No internet exposure, no worries!
+- 🛡️ **End-to-end encryption** - Your secrets stay secret
+- 🔍 **Smart security detection** - Automatically finds and protects sensitive data
+- 📤 **One-click sharing** - Share with a simple code (like `blue-dragon-123`)
+- 💥 **Self-destructing shares** - Files disappear after use (Mission Impossible style!)
+- 🎯 **Beginner-friendly** - No PhD in cryptography required
+
+## 🚀 Quick Start (5 minutes to awesome!)
+
+### Step 1: Build the Magic
 ```bash
 go build -o devlink
 ```
 
-## Usage
+### Step 2: Start the Secret Tunnel
+```bash
+./devlink server
+```
+*Keep this running while you want to share files!*
 
-### 🔐 Environment File Sharing
+### Step 3: Share Your .env File
+```bash
+./devlink env share .env --expiry 1h
+```
+*This gives you a code like `blue-dragon-123` to share with your teammate*
 
-Share environment files securely with your team:
+### Step 4: Your Teammate Gets the File
+```bash
+./devlink env get blue-dragon-123 --output .env
+```
+*Poof! The .env file appears like magic! ✨*
+
+## 📚 Commands Made Simple
+
+### 🚀 Server Commands
+```bash
+./devlink server                    # Start the secure tunnel
+./devlink server --service my-team  # Custom service name
+./devlink server --verbose          # See the magic happening
+```
+
+### 🔐 Environment Sharing
+```bash
+# Share your .env file
+./devlink env share .env                    # Share for 1 hour
+./devlink env share .env --expiry 24h       # Share for 24 hours
+./devlink env share .env --readonly         # Make it read-only (safer!)
+
+# Get a shared .env file
+./devlink env get blue-dragon-123          # Get and display
+./devlink env get blue-dragon-123 --output .env  # Save to file
+./devlink env get blue-dragon-123 --unmask       # Show secrets (be careful!)
+```
+
+## 🎯 Perfect For...
+
+- **Development teams** sharing environment configurations
+- **DevOps engineers** distributing secrets safely
+- **Anyone** who's tired of Slack DMs with API keys
+- **Security-conscious developers** who want zero-trust networking
+- **People** who like cool CLI tools with emojis! 🎉
+
+## 🔧 How It Works (The Magic Explained)
+
+1. **You share a file** → DevLink encrypts it and creates a temporary code
+2. **Your teammate uses the code** → DevLink decrypts and delivers the file
+3. **The share disappears** → Like a self-destructing message! 💥
+4. **Zero internet exposure** → Everything goes through secure tunnels
+
+Think of it like having a secret handshake that only your team knows, but for files! 🤝
+
+## 🛡️ Security Features
+
+- **Zero-trust networking** - No network exposure, ever
+- **Identity-based access** - Only your team can connect
+- **Encrypted tunnels** - All communication is encrypted
+- **Sensitive data masking** - Automatically detects and protects secrets
+- **Single-use shares** - Files delete themselves after access
+- **Time-based expiration** - Shares expire automatically
+
+## 🎨 Architecture (For the Curious)
+
+```
+pkg/envsharing/
+├── core/           # The brain 🧠
+│   ├── parser.go   # Reads .env files
+│   ├── validator.go # Checks for security issues
+│   ├── formatter.go # Makes output pretty
+│   ├── types.go    # Data structures
+│   └── encryption/ # The secret sauce 🔐
+├── network/        # The tunnel 🌉
+│   ├── ziti.go     # OpenZiti service
+│   └── client.go   # OpenZiti client
+└── cli/            # The friendly face 😊
+    └── commands.go # User commands
+```
+
+## ⚙️ Configuration (Optional)
+
+Set these environment variables if you want to customize:
 
 ```bash
-# Share an environment file
-devlink env share .env
-
-# Share with custom expiry and read-only flag
-devlink env share .env --expiry 24h --readonly
-
-# Get a shared environment file
-devlink env get ABC123
-
-# Save retrieved file to disk
-devlink env get ABC123 --output .env
+export ZITI_CONTROLLER_URL="https://controller.example.com"
+export ZITI_IDENTITY_FILE="/path/to/identity.json"
+export ZITI_SERVICE_NAME="my-team-service"
 ```
 
-### 📋 Smart Features
+## 📄 License
 
-#### 🎯 Auto-completion
-Get intelligent suggestions for share codes, file paths, and commands:
+MIT License - Feel free to use this in your projects!
 
-```bash
-# Generate shell completion scripts
-devlink env completion bash > ~/.bash_completion
-devlink env completion zsh > ~/.zsh_completion
+---
 
-# Get suggestions for share codes
-devlink env completion suggest sharecode "blue-whale"
+**Made with ❤️ for developers who care about security and convenience!**
 
-# Get file suggestions
-devlink env completion suggest file ".env"
-```
+*"Because sharing should be caring, not scary!"* 🎭
 
-#### 📋 Templates
-Use pre-built environment templates for common development scenarios:
-
-```bash
-# List available templates
-devlink env template list
-
-# Show template details
-devlink env template show nodejs
-
-# Create environment file from template
-devlink env template create nodejs --output .env
-
-# Search templates
-devlink env template search backend
-```
-
-#### 📦 Bulk Operations
-Share multiple environment files at once:
-
-```bash
-# Share multiple files
-devlink env bulk share file1.env file2.env file3.env
-
-# Share with prefix and custom expiry
-devlink env bulk share *.env --prefix myproject --expiry 24h
-
-# Share with grouping
-devlink env bulk share .env* --group-by category
-```
-
-#### 🔍 Search & Filter
-Find specific variables across multiple environment files:
-
-```bash
-# Search for variables containing "DATABASE"
-devlink env search "DATABASE"
-
-# Show only sensitive variables
-devlink env search --sensitive
-
-# Search by category
-devlink env search --categories database,api
-
-# Use regex patterns
-devlink env search --regex "API_.*"
-
-# Get variable suggestions
-devlink env search suggest "DAT"
-```
-
-### Example Output
-
-**Sharing a file:**
-```
-🚀 Sharing: .env
-⏰ Expires: 1h
-
-✨ Share created successfully!
-📋 Share this code with your team:
-   ABC123
-
-💡 Use: devlink env get ABC123
-```
-
-**Getting a file (example content):**
-```
-🔍 Retrieving: ABC123
-
-📄 Environment file content:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-DATABASE_URL=postgresql://localhost:5432/mydb
-API_KEY=your-secret-key
-REDIS_URL=redis://localhost:6379
-NODE_ENV=development
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-*Note: The environment file content above is just an example. Your actual file content will be displayed.*
-
-## Project Structure
-
-```
-devlink/
-├── cmd/
-│   ├── root.go          # Root CLI command
-│   └── env/             # Environment commands
-│       ├── env.go       # Main env command
-│       ├── share.go     # devlink env share
-│       ├── get.go       # devlink env get
-│       ├── template.go  # Template management
-│       ├── bulk.go      # Bulk operations
-│       ├── search.go    # Search & filter
-│       └── completion.go # Auto-completion
-├── internal/
-│   ├── env/             # Environment processing
-│   │   ├── parser.go    # .env file parser
-│   │   ├── validator.go # Security validation
-│   │   ├── formatter.go # Output formatting
-│   │   ├── bulk.go      # Bulk operations
-│   │   └── server/      # HTTP server
-│   └── util/
-│       ├── config.go    # Configuration
-│       ├── templates.go # Template management
-│       ├── search.go    # Search functionality
-│       ├── completion.go # Auto-completion
-│       ├── token.go     # Share code generation
-│       └── encryption.go # Data encryption
-├── main.go              # Entry point
-├── go.mod
-└── go.sum
-```

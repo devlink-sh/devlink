@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/devlink/cmd/env"
 	"github.com/spf13/cobra"
 )
 
@@ -56,10 +55,6 @@ func Execute() {
 }
 
 func init() {
-	// Global flags
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Enable verbose output")
 	rootCmd.PersistentFlags().BoolP("version", "V", false, "Show version information")
-
-	// Add subcommands
-	rootCmd.AddCommand(env.EnvCmd)
 }
