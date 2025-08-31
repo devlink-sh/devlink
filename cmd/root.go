@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/devlink/cmd/env"
 	"github.com/spf13/cobra"
 )
 
@@ -26,10 +27,6 @@ DevLink is a comprehensive CLI tool designed to streamline development workflows
 by providing efficient link management, project organization, and developer utilities.
 
 Use 'devlink help' to see available commands.`, banner),
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Print(banner)
-		fmt.Println("\nWelcome to DevLink! Use 'devlink help' to get started.")
-	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -43,4 +40,5 @@ func Execute() {
 func init() {
 	// Global flags can be added here
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Enable verbose output")
+	rootCmd.AddCommand(env.EnvCmd)
 }
