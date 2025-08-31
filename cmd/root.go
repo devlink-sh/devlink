@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/devlink/cmd/db"
 	"github.com/devlink/cmd/env"
 	"github.com/spf13/cobra"
 )
@@ -41,4 +42,5 @@ func init() {
 	// Global flags can be added here
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Enable verbose output")
 	rootCmd.AddCommand(env.EnvCmd)
+	rootCmd.AddCommand(db.DBCmd)
 }
