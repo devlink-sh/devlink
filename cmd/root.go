@@ -6,6 +6,7 @@ import (
 
 	"github.com/devlink/cmd/db"
 	"github.com/devlink/cmd/env"
+	"github.com/devlink/cmd/pair"
 	"github.com/spf13/cobra"
 )
 
@@ -43,4 +44,5 @@ func init() {
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Enable verbose output")
 	rootCmd.AddCommand(env.EnvCmd)
 	rootCmd.AddCommand(db.DBCmd)
+	rootCmd.AddCommand(pair.PairCmd)
 }
