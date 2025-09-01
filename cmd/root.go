@@ -7,6 +7,7 @@ import (
 	"github.com/devlink/cmd/db"
 	"github.com/devlink/cmd/env"
 	"github.com/devlink/cmd/pair"
+	"github.com/devlink/cmd/registry"
 	"github.com/spf13/cobra"
 )
 
@@ -45,4 +46,5 @@ func init() {
 	rootCmd.AddCommand(env.EnvCmd)
 	rootCmd.AddCommand(db.DBCmd)
 	rootCmd.AddCommand(pair.PairCmd)
+	rootCmd.AddCommand(registry.RegistryCmd)
 }
