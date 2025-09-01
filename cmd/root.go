@@ -8,9 +8,9 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "devlink-git",
+	Use:   "devlink",
 	Short: "Devlink Git helps you share and connect repos instantly",
-	Long:  `Devlink Git is a CLI tool that helps you expose local git repos via zrok tunnels and connect to others seamlessly.`,
+	Long:  `devlink — minimal MVP that wraps git daemon behind a zrok tunnel.`,
 }
 
 func Execute() {
