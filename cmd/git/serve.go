@@ -35,7 +35,7 @@ var gitServeCmd = &cobra.Command{
 			"--export-all",
 			"--verbose",
 			"--enable=receive-pack", // allow push
-			repoPath,                // actual repo
+
 		)
 		gitDaemon.Stdout = os.Stdout
 		gitDaemon.Stderr = os.Stderr
