@@ -19,27 +19,27 @@ var gitConnectCmd = &cobra.Command{
 	Short: "Connect to a shared Git repository",
 	Args:  cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		shareToken := args[0]
-		repoName := args[1] // 👈 we require repo name explicitly
+		token := args[0]
+		repoName := args[1]
 
 		root, err := environment.LoadRoot()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		conn, err := sdk.NewConn(shareToken, root)
+		acc, err := sdk.CreateAccess(root, &sdk.AccessRequest{ShareToken: token})
 		if err != nil {
 			log.Fatal(err)
 		}
+		defer sdk.DeleteAccess(root, acc)
 
-		// Dial local TCP port 9418
-		local, err := net.Listen("tcp", "127.0.0.1:9418")
+		listener, err := net.Listen("tcp", "127.0.0.1:9418")
 		if err != nil {
 			log.Fatal(err)
 		}
-		defer local.Close()
+		defer listener.Close()
 
-		log.Printf("Connected to shared repo! You can now run:\n\n   git clone git://127.0.0.1:9418/%s\n", repoName)
+		log.Printf("Git tunnel ready at git://127.0.0.1:9418/%s", repoName)
 
 		// Handle Ctrl+C
 		c := make(chan os.Signal, 1)
@@ -47,27 +47,27 @@ var gitConnectCmd = &cobra.Command{
 		go func() {
 			<-c
 			log.Println("Shutting down git connect...")
-			_ = conn.Close()
-			_ = local.Close()
+			_ = listener.Close()
 			os.Exit(0)
 		}()
 
 		for {
-			remote, err := conn.Accept()
+			client, err := listener.Accept()
 			if err != nil {
-				log.Printf("error accepting remote: %v", err)
+				log.Printf("error accepting client: %v", err)
 				continue
 			}
 
-			go func(r net.Conn) {
-				l, err := net.Dial("tcp", "127.0.0.1:9418")
+			go func(c net.Conn) {
+				remote, err := sdk.NewDialer(token, root)
 				if err != nil {
-					log.Printf("error dialing local git: %v", err)
-					r.Close()
+					log.Printf("error dialing zrok: %v", err)
+					c.Close()
 					return
 				}
-				internal.Pipe(r, l)
-			}(remote)
+				log.Printf("Forwarding local Git client...")
+				internal.Pipe(c, remote)
+			}(client)
 		}
 	},
 }
