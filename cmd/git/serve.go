@@ -1,3 +1,4 @@
+// serve.go
 package git
 
 import (
@@ -6,9 +7,10 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 
-	"github.com/devlink/internal" // adjust module path
+	"github.com/devlink/internal"
 	"github.com/openziti/zrok/environment"
 	"github.com/openziti/zrok/sdk/golang/sdk"
 	"github.com/spf13/cobra"
@@ -19,16 +21,21 @@ var gitServeCmd = &cobra.Command{
 	Short: "Share a local Git repository",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		repoPath := args[0]
+		repoPath, err := filepath.Abs(args[0])
+		if err != nil {
+			log.Fatalf("failed to resolve repo path: %v", err)
+		}
+
+		parentDir := filepath.Dir(repoPath)
 
 		// Start git daemon locally
 		gitDaemon := exec.Command("git", "daemon",
 			"--reuseaddr",
-			"--base-path="+repoPath,
+			"--base-path="+parentDir, // parent dir as base path
 			"--export-all",
 			"--verbose",
 			"--enable=receive-pack", // allow push
-			repoPath,
+			repoPath,                // actual repo
 		)
 		gitDaemon.Stdout = os.Stdout
 		gitDaemon.Stderr = os.Stderr

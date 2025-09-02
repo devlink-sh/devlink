@@ -1,3 +1,4 @@
+// connect.go
 package git
 
 import (
@@ -7,37 +8,38 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/devlink/internal" // adjust module path
+	"github.com/devlink/internal"
 	"github.com/openziti/zrok/environment"
 	"github.com/openziti/zrok/sdk/golang/sdk"
 	"github.com/spf13/cobra"
 )
 
 var gitConnectCmd = &cobra.Command{
-	Use:   "connect <token> <port>",
+	Use:   "connect <share-token> <repo-name>",
 	Short: "Connect to a shared Git repository",
 	Args:  cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		token := args[0]
-		port := args[1]
+		shareToken := args[0]
+		repoName := args[1] // 👈 we require repo name explicitly
 
 		root, err := environment.LoadRoot()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		acc, err := sdk.CreateAccess(root, &sdk.AccessRequest{ShareToken: token})
+		conn, err := sdk.NewConn(shareToken, root)
 		if err != nil {
 			log.Fatal(err)
 		}
-		defer sdk.DeleteAccess(root, acc)
 
-		listener, err := net.Listen("tcp", "127.0.0.1:"+port)
+		// Dial local TCP port 9418
+		local, err := net.Listen("tcp", "127.0.0.1:9418")
 		if err != nil {
 			log.Fatal(err)
 		}
-		defer listener.Close()
-		log.Printf("Git tunnel ready at git://127.0.0.1:%s", port)
+		defer local.Close()
+
+		log.Printf("Connected to shared repo! You can now run:\n\n   git clone git://127.0.0.1:9418/%s\n", repoName)
 
 		// Handle Ctrl+C
 		c := make(chan os.Signal, 1)
@@ -45,27 +47,27 @@ var gitConnectCmd = &cobra.Command{
 		go func() {
 			<-c
 			log.Println("Shutting down git connect...")
-			_ = listener.Close()
+			_ = conn.Close()
+			_ = local.Close()
 			os.Exit(0)
 		}()
 
 		for {
-			client, err := listener.Accept()
+			remote, err := conn.Accept()
 			if err != nil {
-				log.Printf("error accepting client: %v", err)
+				log.Printf("error accepting remote: %v", err)
 				continue
 			}
 
-			go func(c net.Conn) {
-				remote, err := sdk.NewDialer(token, root)
+			go func(r net.Conn) {
+				l, err := net.Dial("tcp", "127.0.0.1:9418")
 				if err != nil {
-					log.Printf("error dialing zrok: %v", err)
-					c.Close()
+					log.Printf("error dialing local git: %v", err)
+					r.Close()
 					return
 				}
-				log.Printf("Forwarding local Git client...")
-				internal.Pipe(c, remote)
-			}(client)
+				internal.Pipe(r, l)
+			}(remote)
 		}
 	},
 }
