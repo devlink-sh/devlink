@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/devlink/cmd/db"
+	"github.com/devlink/cmd/directory"
 	"github.com/devlink/cmd/env"
 	"github.com/devlink/cmd/git"
 	"github.com/devlink/cmd/pair"
@@ -49,4 +50,5 @@ func init() {
 	rootCmd.AddCommand(pair.PairCmd)
 	rootCmd.AddCommand(registry.RegistryCmd)
 	rootCmd.AddCommand(git.GitCmd)
+	rootCmd.AddCommand(directory.DirectoryCmd)
 }

@@ -51,14 +51,14 @@ With DevLink you can turn *any local Git repo* into a temporary share, and your 
 
 ## 📦 Installation
 
-1. Clone the DevLink repository:
+1. **Clone the DevLink repository**
 
 ```bash
 git clone <devlink-repo-url>
 cd DevLink
 ```
 
-2. Build the CLI tool:
+2. **Build the CLI tool**
 
 ```bash
 go build -o devlink
@@ -123,7 +123,7 @@ Once connected, teammates can use standard Git commands:
 
 ```bash
 git add <file>
-git commit -m "message"
+git commit -m "Your message"
 git push origin master
 git pull
 ```
