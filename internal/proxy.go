@@ -2,31 +2,37 @@ package internal
 
 import (
 	"io"
-	"log"
 	"net"
-	"sync"
 )
 
-func Pipe(clientConnection, targetConnection net.Conn) {
-	defer clientConnection.Close()
-	defer targetConnection.Close()
+// closeWrite attempts a half-close on TCP; no-op for non-TCP conns.
+func closeWrite(c net.Conn) {
+	if tc, ok := c.(*net.TCPConn); ok {
+		_ = tc.CloseWrite()
+	}
+}
 
-	var wg sync.WaitGroup
-	wg.Add(2)
+func Pipe(a, b net.Conn) {
+	defer a.Close()
+	defer b.Close()
 
+	errc := make(chan error, 2)
+
+	// a -> b
 	go func() {
-		defer wg.Done()
-		if _, err := io.Copy(targetConnection, clientConnection); err != nil {
-			log.Printf("Error copying from client to target: %v", err)
-		}
+		_, err := io.Copy(b, a)
+		closeWrite(b) // signal EOF downstream
+		errc <- err
 	}()
 
+	// b -> a
 	go func() {
-		defer wg.Done()
-		if _, err := io.Copy(clientConnection, targetConnection); err != nil {
-			log.Printf("Error copying from target to client: %v", err)
-		}
+		_, err := io.Copy(a, b)
+		closeWrite(a)
+		errc <- err
 	}()
 
-	wg.Wait()
+	// wait for both directions to finish (or first hard error)
+	<-errc
+	<-errc
 }

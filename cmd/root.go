@@ -14,24 +14,42 @@ import (
 )
 
 const banner = `
- ____             _     _       _    
-|  _ \  _____   _| |   (_)_ __ | | __
-| | | |/ _ \ \ / / |   | | '_ \| |/ /
-| |_| |  __/\ V /| |___| | | | |   < 
-|____/ \___| \_/ |_____|_|_| |_|_|\_\
+╔══════════════════════════════════════════════════════════════╗
+║                                                              ║
+║    ██████╗ ███████╗██╗   ██╗██╗     ██╗███╗   ██╗██╗  ██╗    ║
+║   ██╔══██╗██╔════╝██║   ██║██║     ██║████╗  ██║██║ ██╔╝     ║
+║   ██║  ██║█████╗  ██║   ██║██║     ██║██╔██╗ ██║█████╔╝      ║
+║   ██║  ██║██╔══╝  ██║   ██║██║     ██║██║╚██╗██║██╔═██╗      ║
+║   ██████╔╝███████╗╚██████╔╝███████╗██║██║ ╚████║██║  ██╗     ║
+║   ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝     ║
+║                                                              ║
+║                    Development Workflow CLI                  ║
+║                                                              ║
+╚══════════════════════════════════════════════════════════════╝
 
-🚀 DevLink - Development Workflow Management CLI
-Version: 1.0.0
 `
 
 var rootCmd = &cobra.Command{
 	Use:   "devlink",
-	Short: "DevLink - A powerful CLI for development workflow management",
+	Short: "🚀 DevLink - Streamline your development workflow",
 	Long: fmt.Sprintf(`%s
-DevLink is a comprehensive CLI tool designed to streamline development workflows
-by providing efficient link management, project organization, and developer utilities.
+DevLink is a powerful CLI tool that streamlines development workflows
+by providing efficient link management, project organization, and 
+developer utilities.
 
-Use 'devlink help' to see available commands.`, banner),
+📚 Available Commands:
+  • git       - Share and connect to Git repositories
+  • pair      - Share your localhost with teammates
+  • env       - Share development environments
+  • db        - Database management and sharing
+  • registry  - Docker registry management
+
+💡 Quick Start:
+  devlink git serve <repo-path>     # Share a repository
+  devlink pair                      # Share localhost
+  devlink help <command>            # Get detailed help
+
+Use 'devlink help' to explore all available commands.`, banner),
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
