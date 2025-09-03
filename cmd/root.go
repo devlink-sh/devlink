@@ -8,6 +8,7 @@ import (
 	"github.com/devlink/cmd/directory"
 	"github.com/devlink/cmd/env"
 	"github.com/devlink/cmd/git"
+	"github.com/devlink/cmd/hive"
 	"github.com/devlink/cmd/pair"
 	"github.com/devlink/cmd/registry"
 	"github.com/spf13/cobra"
@@ -69,4 +70,5 @@ func init() {
 	rootCmd.AddCommand(registry.RegistryCmd)
 	rootCmd.AddCommand(git.GitCmd)
 	rootCmd.AddCommand(directory.DirectoryCmd)
+	rootCmd.AddCommand(hive.HiveCmd)
 }
