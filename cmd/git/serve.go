@@ -46,11 +46,10 @@ var gitServeCmd = &cobra.Command{
 		}
 
 		// Derive repo name (always ends with .git)
-		parentDir := filepath.Dir(repoPath)
-		repoName := filepath.Base(repoPath)
-		if !strings.HasSuffix(repoName, ".git") {
-			repoName += ".git"
-		}
+		repoRoot := filepath.Dir(repoPath) // repoPath is already .../.git
+		repoName := filepath.Base(repoRoot) + ".git"
+
+		parentDir := filepath.Dir(repoRoot)
 
 		// Start git daemon locally
 		gitDaemon := exec.Command("git", "daemon",
