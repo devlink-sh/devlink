@@ -37,8 +37,8 @@ var hiveContributeCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		url := fmt.Sprintf("http://localhost:8081/hives/contribute?hive=%s&service=%s&port=%s&token=%s",
-			hiveToken, service, port, share.Token)
+		url := fmt.Sprintf("%s/hives/contribute?hive=%s&service=%s&port=%s&token=%s",
+			BaseURL, hiveToken, service, port, share.Token)
 		_, err = http.Post(url, "text/plain", nil)
 		if err != nil {
 			log.Fatal(err)

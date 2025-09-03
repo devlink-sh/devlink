@@ -16,7 +16,7 @@ import (
 	"github.com/openziti/zrok/sdk/golang/sdk"
 	"github.com/spf13/cobra"
 )
-
+var BaseURL = "https://tazidgt171sl.share.zrok.io"
 // Service struct must match Hive Controller response
 type Service struct {
 	Name  string `json:"name"`
@@ -40,7 +40,7 @@ var hiveConnectCmd = &cobra.Command{
 		}
 
 		// Fetch services from Hive Controller
-		url := fmt.Sprintf("http://localhost:8081/hives/services?hive=%s", hiveToken)
+		url := fmt.Sprintf("%s/hives/services?hive=%s", BaseURL, hiveToken)
 		resp, err := http.Get(url)
 		if err != nil {
 			log.Fatalf("error querying hive controller: %v", err)
