@@ -16,7 +16,7 @@ import (
 	"github.com/openziti/zrok/sdk/golang/sdk"
 	"github.com/spf13/cobra"
 )
-var BaseURL = "https://tazidgt171sl.share.zrok.io"
+
 // Service struct must match Hive Controller response
 type Service struct {
 	Name  string `json:"name"`
