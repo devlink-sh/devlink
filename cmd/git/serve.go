@@ -1,4 +1,3 @@
-// serve.go
 package git
 
 import (
@@ -8,6 +7,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 
 	"github.com/devlink/internal"
@@ -21,21 +21,44 @@ var gitServeCmd = &cobra.Command{
 	Short: "Share a local Git repository",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		// Normalize input path
 		repoPath, err := filepath.Abs(args[0])
 		if err != nil {
 			log.Fatalf("failed to resolve repo path: %v", err)
 		}
 
+		// If user gave ".", normalize to repo root using git rev-parse
+		cmdCheck := exec.Command("git", "rev-parse", "--show-toplevel")
+		cmdCheck.Dir = repoPath
+		if out, err := cmdCheck.Output(); err == nil {
+			repoPath = strings.TrimSpace(string(out))
+		}
+
+		// If it's a working repo, redirect to .git folder
+		gitDir := filepath.Join(repoPath, ".git")
+		if stat, err := os.Stat(gitDir); err == nil && stat.IsDir() {
+			repoPath = gitDir
+		}
+
+		// Validate repo (must contain HEAD)
+		if _, err := os.Stat(filepath.Join(repoPath, "HEAD")); err != nil {
+			log.Fatalf("error: %s is not a valid git repository", args[0])
+		}
+
+		// Derive repo name (always ends with .git)
 		parentDir := filepath.Dir(repoPath)
+		repoName := filepath.Base(repoPath)
+		if !strings.HasSuffix(repoName, ".git") {
+			repoName += ".git"
+		}
 
 		// Start git daemon locally
 		gitDaemon := exec.Command("git", "daemon",
 			"--reuseaddr",
-			"--base-path="+parentDir, // parent dir as base path
+			"--base-path="+parentDir,
 			"--export-all",
 			"--verbose",
 			"--enable=receive-pack", // allow push
-
 		)
 		gitDaemon.Stdout = os.Stdout
 		gitDaemon.Stderr = os.Stderr
@@ -43,7 +66,7 @@ var gitServeCmd = &cobra.Command{
 		if err := gitDaemon.Start(); err != nil {
 			log.Fatalf("failed to start git daemon: %v", err)
 		}
-		log.Printf("Git daemon started for %s (listening on 127.0.0.1:9418)", repoPath)
+		log.Printf("Git daemon started for %s (listening on 127.0.0.1:9418)", repoName)
 
 		// Setup zrok share
 		root, err := environment.LoadRoot()
@@ -59,7 +82,7 @@ var gitServeCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Printf("Git share ready! Teammates can connect via:\n  devlink git connect %s 9418", share.Token)
+		log.Printf("Git share ready! Teammates can connect via:\n  devlink git connect %s %s", share.Token, repoName)
 
 		// Accept zrok connections
 		listener, err := sdk.NewListener(share.Token, root)
@@ -88,7 +111,7 @@ var gitServeCmd = &cobra.Command{
 			}
 
 			go func(remote net.Conn) {
-				local, err := net.Dial("tcp", "127.0.0.1:9418") // git:// default port
+				local, err := net.Dial("tcp", "127.0.0.1:9418") // git daemon port
 				if err != nil {
 					log.Printf("error dialing local git daemon: %v", err)
 					remote.Close()

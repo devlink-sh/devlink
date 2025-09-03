@@ -7,7 +7,7 @@ import (
 	"sync"
 )
 
-func Pipe(clientConnection, targetConnection net.Conn){
+func Pipe(clientConnection, targetConnection net.Conn) {
 	defer clientConnection.Close()
 	defer targetConnection.Close()
 
@@ -30,4 +30,3 @@ func Pipe(clientConnection, targetConnection net.Conn){
 
 	wg.Wait()
 }
-
