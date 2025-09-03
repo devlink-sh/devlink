@@ -45,6 +45,16 @@ var gitServeCmd = &cobra.Command{
 			log.Fatalf("error: %s is not a valid git repository", args[0])
 		}
 
+		// ✅ Ensure repo is exportable by creating git-daemon-export-ok
+		exportOk := filepath.Join(repoPath, "git-daemon-export-ok")
+		if _, err := os.Stat(exportOk); os.IsNotExist(err) {
+			f, err := os.Create(exportOk)
+			if err != nil {
+				log.Fatalf("failed to create export-ok: %v", err)
+			}
+			_ = f.Close()
+		}
+
 		// Derive repo name (always ends with .git)
 		repoRoot := filepath.Dir(repoPath) // repoPath is already .../.git
 		repoName := filepath.Base(repoRoot) + ".git"
@@ -57,7 +67,8 @@ var gitServeCmd = &cobra.Command{
 			"--base-path="+parentDir,
 			"--export-all",
 			"--verbose",
-			"--enable=receive-pack", // allow push
+			"--enable=upload-pack",  // ✅ allow clone/pull
+			"--enable=receive-pack", // ✅ allow push
 		)
 		gitDaemon.Stdout = os.Stdout
 		gitDaemon.Stderr = os.Stderr
