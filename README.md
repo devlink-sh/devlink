@@ -38,117 +38,116 @@ DevLink/
 └─ README.md
 ````
 
+
 ---
 
-## **Installation**
+# DevLink
 
-1. **Clone the DevLink repository**
+DevLink is a CLI tool that enables **seamless, peer-to-peer sharing of local Git repositories** without exposing your machine to the public internet.
+
+With DevLink you can turn *any local Git repo* into a temporary share, and your teammates can instantly clone or push without needing GitHub, VPNs, or public servers.
+
+---
+
+## 📦 Installation
+
+1. Clone the DevLink repository:
 
 ```bash
 git clone <devlink-repo-url>
 cd DevLink
 ```
 
-2. **Build the CLI tool**
+2. Build the CLI tool:
 
 ```bash
 go build -o devlink
 ```
 
-> This generates the `devlink` executable in your current directory.
+This generates a `devlink` executable in your current directory.
 
 ---
 
-## **Git Repository Sharing**
+## 🚀 Usage
 
-DevLink allows you to securely share a local Git repository with teammates via a temporary, encrypted tunnel.
+### 1. Start sharing a repository (Host machine)
 
----
-
-### **1. Serve a Repository (Host Machine / Laptop A)**
-
-1. Initialize a bare repository:
+From inside the repo you want to share:
 
 ```bash
-git init --bare ~/test-repo.git
-touch ~/test-repo.git/git-daemon-export-ok
+cd ~/Documents/my-project
+~/Documents/devlink/devlink git serve .
 ```
 
-2. Start the DevLink Git server:
-
-```bash
-./devlink git serve ~/test-repo.git
-```
-
-> The terminal will display a token for connecting teammates:
+Output:
 
 ```
+Git daemon started for my-project.git (listening on 127.0.0.1:9418)
 Git share ready! Teammates can connect via:
-  devlink git connect <token> 9418
+  devlink git connect abcd1234 my-project.git
 ```
 
-> Keep this terminal open to maintain the server session.
+* `abcd1234` is the temporary share token.
+* `my-project.git` is the repo name teammates will use.
+* Keep this terminal open while sharing.
 
 ---
 
-### **2. Connect to a Repository (Client Machine / Laptop B)**
+### 2. Connect to a repository (Teammate machine)
+
+Run:
 
 ```bash
-./devlink git connect <token> test-repo.git
+./devlink git connect abcd1234 my-project.git
 ```
 
-> Keep this terminal open to maintain the tunnel.
+This opens a secure tunnel to the host’s Git repo.
 
 ---
 
-### **3. Clone the Repository**
+### 3. Clone the repository
 
-In a separate terminal on Laptop B:
-
-```bash
-git clone git://127.0.0.1:9418/test-repo.git
-```
-
-> If the target folder already exists, specify a new folder name:
+In a **new terminal** on the teammate’s machine:
 
 ```bash
-git clone git://127.0.0.1:9418/test-repo.git my-clone
+git clone git://127.0.0.1:9418/my-project.git
 ```
+
+This gives you a working copy of the repo.
 
 ---
 
-### **4. Initial Commit (if repository is empty)**
+### 4. Normal workflow
 
-On Laptop A (or after cloning locally):
-
-```bash
-git clone ~/test-repo.git ~/temp-clone
-cd ~/temp-clone
-touch README.md
-git add README.md
-git commit -m "Initial commit"
-git push origin master
-```
-
-> This ensures the repository has a starting commit for collaboration.
-
----
-
-## **Normal Workflow**
-
-Once the repository is set up, you can use standard Git commands through the DevLink tunnel:
+Once connected, teammates can use standard Git commands:
 
 ```bash
 git add <file>
-git commit -m "Your message"
+git commit -m "message"
 git push origin master
 git pull
 ```
 
-> **Important:**
->
-> * Keep `git serve` running on the host machine.
-> * Keep `git connect` running on the client machine to maintain the tunnel.
+---
+
+## 📝 Notes
+
+* You can serve **any repo** by `cd` into it and running:
+
+  ```bash
+  ./devlink git serve .
+  ```
+* If the repo has no commits yet, initialize it:
+
+  ```bash
+  git init
+  git add .
+  git commit -m "initial commit"
+  ```
+* Keep both `git serve` (host) and `git connect` (teammate) terminals open while working.
+* When done, `Ctrl+C` to stop the tunnel.
+
+
 
 ```
 
