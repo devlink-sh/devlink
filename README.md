@@ -113,7 +113,7 @@ git pull
 
 ---
 
-## **🧩 Directory Sharing (`dir`)** *(if applicable)*
+## **🧩 Directory Sharing (`dir`)** *
 
 > Share entire local directories with teammates in a peer-to-peer manner.
 
