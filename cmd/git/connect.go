@@ -17,6 +17,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// freeLocalListener finds a free local port by binding to 127.0.0.1:0
 func freeLocalListener() (net.Listener, int, error) {
 	l, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
@@ -34,7 +35,7 @@ var gitConnectCmd = &cobra.Command{
 		token := args[0]
 		repoName := args[1]
 
-		// Canonicalize repo name exactly once
+		// Canonicalize repo name
 		if !strings.HasSuffix(strings.ToLower(repoName), ".git") {
 			repoName += ".git"
 		}
@@ -45,21 +46,21 @@ var gitConnectCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		// Access session (directional: this side is the client)
+		// Create an access session (this side = client)
 		session, err := sdk.CreateAccess(root, &sdk.AccessRequest{ShareToken: token})
 		if err != nil {
 			log.Fatal(err)
 		}
 		defer sdk.DeleteAccess(root, session)
 
-		// Bind a free local port for the git client to talk to
+		// Bind a free local port for git client to talk to
 		listener, localPort, err := freeLocalListener()
 		if err != nil {
 			log.Fatalf("failed to acquire local port: %v", err)
 		}
 		defer listener.Close()
 
-		// Print clone instructions with exact canonical values
+		// Print clone instructions
 		cloneURL := fmt.Sprintf("git://127.0.0.1:%d/%s", localPort, repoName)
 		workDir := strings.TrimSuffix(repoName, ".git")
 		clonePath := filepath.Join(".", workDir)
@@ -68,7 +69,7 @@ var gitConnectCmd = &cobra.Command{
 		log.Printf("Clone using:\n\n  git clone %s %s\n", cloneURL, clonePath)
 		log.Printf("Keep this process running to use git fetch/pull/push.")
 
-		// Ctrl+C shutdown
+		// Handle Ctrl+C
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 		go func() {
@@ -79,7 +80,7 @@ var gitConnectCmd = &cobra.Command{
 			os.Exit(0)
 		}()
 
-		// Accept loop with backoff on temporary errors
+		// Accept loop with backoff for temporary errors
 		var tempDelay time.Duration
 		for {
 			client, err := listener.Accept()
@@ -102,17 +103,22 @@ var gitConnectCmd = &cobra.Command{
 			}
 			tempDelay = 0
 
-			// Dial remote through zrok
+			// Forward traffic to remote git-daemon through zrok
 			go func(c net.Conn) {
+				defer c.Close()
+
+				// Establish a connection through zrok using the token
 				remote, err := sdk.NewDialer(token, root)
 				if err != nil {
-					log.Printf("error creating zrok dialer: %v", err)
-					_ = c.Close()
+					log.Printf("error creating zrok connection: %v", err)
 					return
 				}
+				defer remote.Close()
+
 				log.Printf("Forwarding git traffic (client<->remote)...")
 				internal.Pipe(c, remote)
 			}(client)
+
 		}
 	},
 }
