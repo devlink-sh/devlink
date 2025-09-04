@@ -1,154 +1,235 @@
 
-# DevLink
+Secure, peer-to-peer developer collaboration.
+Share environments, databases, repos, and artifacts without pushing to the cloud.
+# **DevLink CLI Reference**
 
-DevLink is a CLI tool that enables seamless, **peer-to-peer sharing of local Git repositories** without exposing your machine to the public internet. This guide covers installation, repository sharing, and normal workflow.
-
----
-
-## **Folder Structure**
-
-```plaintext
-DevLink/
-├─ cmd/
-│  ├─ db/
-│  │  ├─ db.go
-│  │  ├─ get.go
-│  │  └─ share.go
-│  ├─ env/
-│  │  ├─ env.go
-│  │  ├─ get.go
-│  │  └─ share.go
-│  ├─ git/
-│  │  ├─ connect.go       
-│  │  ├─ git.go          
-│  │  └─ serve.go        
-│  ├─ pair/
-│  │  ├─ get.go
-│  │  ├─ pair.go
-│  │  └─ share.go
-│  └─ registry/
-│     ├─ get.go
-│     ├─ registry.go
-│     └─ share.go
-├─ internal/
-│  └─ proxy.go            
-├─ main.go
-├─ go.mod
-├─ go.sum
-└─ README.md
-````
-
+> A comprehensive guide to all DevLink commands for secure, peer-to-peer developer collaboration.
 
 ---
 
-# DevLink
+## **📦 Installation**
 
-DevLink is a CLI tool that enables **seamless, peer-to-peer sharing of local Git repositories** without exposing your machine to the public internet.
-
-With DevLink you can turn *any local Git repo* into a temporary share, and your teammates can instantly clone or push without needing GitHub, VPNs, or public servers.
-
----
-
-## 📦 Installation
-
-1. **Clone the DevLink repository**
+Build and install DevLink locally:
 
 ```bash
 git clone <devlink-repo-url>
 cd DevLink
-```
-
-2. **Build the CLI tool**
-
-```bash
 go build -o devlink
 ```
 
-This generates a `devlink` executable in your current directory.
-
----
-
-## 🚀 Usage
-
-### 1. Start sharing a repository (Host machine)
-
-From inside the repo you want to share:
+Optionally, move it to PATH for global usage:
 
 ```bash
-cd ~/Documents/my-project
-~/Documents/devlink/devlink git serve .
+sudo mv devlink /usr/local/bin/
 ```
-
-Output:
-
-```
-Git daemon started for my-project.git (listening on 127.0.0.1:9418)
-Git share ready! Teammates can connect via:
-  devlink git connect abcd1234 my-project.git
-```
-
-* `abcd1234` is the temporary share token.
-* `my-project.git` is the repo name teammates will use.
-* Keep this terminal open while sharing.
 
 ---
 
-### 2. Connect to a repository (Teammate machine)
+## **🔐 Environment Sharing (`env`)**
 
-Run:
+> Share `.env` or secret files securely with teammates.
+
+**Share an environment:**
 
 ```bash
-./devlink git connect abcd1234 my-project.git
+devlink env share
 ```
 
-This opens a secure tunnel to the host’s Git repo.
-
----
-
-### 3. Clone the repository
-
-In a **new terminal** on the teammate’s machine:
+**Fetch an environment:**
 
 ```bash
-git clone git://127.0.0.1:9418/my-project.git
+devlink env get <share-token>
 ```
 
-This gives you a working copy of the repo.
+**Key Notes:**
+
+* ✅ End-to-end encrypted
+* ✅ Instant transfer
+* ✅ No third-party servers
 
 ---
 
-### 4. Normal workflow
+## **🗄️ Database Sharing (`db`)**
 
-Once connected, teammates can use standard Git commands:
+> Grant ephemeral, read-only access to local databases.
+
+**Share a database (example port 5432):**
+
+```bash
+devlink db share 5432
+```
+
+**Connect to a shared DB locally:**
+
+```bash
+devlink db get <share-token> <local-port>
+```
+
+**Example (Postgres):**
+
+```bash
+psql -h 127.0.0.1 -p <local-port> -U <db-username> -d <db-name>
+```
+
+**Benefits:**
+
+* ✅ Live integration
+* ✅ Secure and ephemeral
+* ✅ Minimal setup
+
+---
+
+## **🌱 Git Repository Sharing (`git`)**
+
+> Share your local Git repository without pushing WIP code.
+
+**Serve a repo:**
+
+```bash
+cd ~/projects/my-repo
+devlink git serve .
+```
+
+**Connect to a shared repo:**
+
+```bash
+devlink git connect <share-token> my-repo.git
+```
+
+**Clone a shared repo:**
+
+```bash
+git clone git://127.0.0.1:9418/my-repo.git
+```
+
+**Continue normal workflow:**
 
 ```bash
 git add <file>
-git commit -m "Your message"
-git push origin master
+git commit -m "message"
+git push origin main
 git pull
 ```
 
 ---
 
-## 📝 Notes
+## **🧩 Directory Sharing (`dir`)** *(if applicable)*
 
-* You can serve **any repo** by `cd` into it and running:
+> Share entire local directories with teammates in a peer-to-peer manner.
 
-  ```bash
-  ./devlink git serve .
-  ```
-* If the repo has no commits yet, initialize it:
+**Share a directory:**
 
-  ```bash
-  git init
-  git add .
-  git commit -m "initial commit"
-  ```
-* Keep both `git serve` (host) and `git connect` (teammate) terminals open while working.
-* When done, `Ctrl+C` to stop the tunnel.
-
-
-
+```bash
+devlink dir share <path>
 ```
 
+**Connect / fetch a shared directory:**
+
+```bash
+devlink dir get <share-token> <local-path>
+```
+
+---
+
+## **🚀 Hive: Ephemeral Staging Environments (`hive`)**
+
+> Spin up shared temporary environments for integrated testing.
+
+**Create a new Hive:**
+
+```bash
+devlink hive create <hive-name>
+```
+
+**Contribute a service:**
+
+```bash
+devlink hive contribute --service <name> --port <port> --hive <invite-token>
+```
+
+**Connect to an existing Hive:**
+
+```bash
+devlink hive connect --hive <invite-token>
+```
+
+**Teardown:**
+
+* Press `Ctrl+C` to stop contributing
+* Environment disappears automatically
+
+**Impact:**
+
+* ✅ Live, ephemeral multi-service environment
+* ✅ Fast testing & debugging
+* ✅ Zero-trust P2P network
+
+---
+
+## **🔗 Pairing with Hive Controller (`pair`)**
+
+> Connect your CLI to the central Hive Controller for coordination.
+
+**Pair CLI with controller:**
+
+```bash
+devlink pair get <pair-token> <controller-port>
+```
+
+* Controller becomes available at: `http://localhost:<controller-port>`
+* Required before creating or connecting to Hives
+
+---
+
+## **📦 Registry Sharing (`registry`)**
+
+> Share Docker images or local artifacts P2P with teammates.
+
+**Send a Docker image / artifact:**
+
+```bash
+devlink registry send <image-name>
+```
+
+**Receive an image / artifact:**
+
+```bash
+devlink registry receive <share-token>
+```
+
+**Key Notes:**
+
+* ✅ Direct P2P transfer
+* ✅ Faster than central registries
+* ✅ Works offline / within team network
+
+---
+
+## **📊 Why DevLink is Different**
+
+* 🔒 Zero-trust: each share scoped to a single tunnel
+* ⚡ Peer-to-peer: no cloud hosting required
+* 🔐 Secure by design: `.env` files, DBs, Git branches never leak
+* 🎯 Real-world usage: hackathons, live demos, team sprints
+
+---
+
+## **💡 Example Workflow**
+
+1. Pair CLI: `devlink pair get <token> <port>`
+2. Share environment: `devlink env share` → teammate `devlink env get <token>`
+3. Share DB: `devlink db share <port>` → teammate connects
+4. Share Git repo: `devlink git serve` → teammate clones
+5. Spin up ephemeral staging: `devlink hive create` → contribute services → QA connects
+6. Share artifacts/images: `devlink registry send <image>` → teammate receives
+7. Teardown: Ctrl+C → environment disappears
+
+---
+
+✅ **Everything is generic & reusable:**
+
+* Tokens, ports, paths, usernames are placeholders
+* No personal info is exposed
+
+---
 
