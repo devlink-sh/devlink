@@ -44,7 +44,12 @@ var hiveConnectCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+<<<<<<< HEAD
 		url := fmt.Sprintf("%s/hives/services?hive=%s", controllerURL, hiveToken)
+=======
+		// Fetch services from Hive Controller
+		url := fmt.Sprintf("%s/hives/services?hive=%s", BaseURL, hiveToken)
+>>>>>>> eb03ba59dbe0f48a9a05c705ffbfd12b477ec1dd
 		resp, err := http.Get(url)
 		if err != nil {
 			log.Fatalf("error querying hive controller: %v", err)
