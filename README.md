@@ -1,5 +1,11 @@
 
 
+---
+
+**DevLink** is a peer-to-peer CLI toolkit that removes development and staging friction. It enables secure, direct sharing of **environments, databases, repositories, services, and containers** between developers — without staging servers, cloud costs, or insecure workarounds.
+
+Modern development suffers from collaboration bottlenecks: pushing half-done commits just to unblock teammates, leaking secrets over chat apps, or waiting on staging to test a two-line change. DevLink replaces these with **direct, ephemeral, encrypted connections** — making collaboration as fast as running a command.
+
 # DevLink
 
 <div align="center">
@@ -13,15 +19,21 @@
 <h2>The Peer-to-Peer Toolkit for Frictionless Development</h2>
 <p><strong>Stop Configuring. Start Collaborating.</strong></p>
 
-<a href="#"><img src="https://img.shields.io/github/actions/workflow/status/your-org/devlink/ci.yml?branch=main&style=for-the-badge" alt="Build Status"></a> <a href="#"><img src="https://img.shields.io/github/v/release/your-org/devlink?style=for-the-badge" alt="Latest Release"></a> <a href="./LICENSE"><img src="https://img.shields.io/github/license/your-org/devlink?style=for-the-badge" alt="License"></a> <a href="#"><img src="https://img.shields.io/badge/Go-1.18+-00ADD8.svg?style=for-the-badge&logo=go" alt="Go Version"></a>
+<a href="https://github.com/gupta-nu/devlynk/actions">
+  <img src="https://img.shields.io/github/actions/workflow/status/gupta-nu/devlynk/ci.yml?branch=main&style=for-the-badge" alt="Build Status">
+</a>
+<a href="https://github.com/gupta-nu/devlynk/releases">
+  <img src="https://img.shields.io/github/v/release/gupta-nu/devlynk?style=for-the-badge" alt="Latest Release">
+</a>
+<a href="./LICENSE">
+  <img src="https://img.shields.io/github/license/gupta-nu/devlynk?style=for-the-badge" alt="License">
+</a>
+<a href="#">
+  <img src="https://img.shields.io/badge/Go-1.18+-00ADD8.svg?style=for-the-badge&logo=go" alt="Go Version">
+</a>
+
 
 </div>
-
----
-
-**DevLink** is a peer-to-peer CLI toolkit that removes development and staging friction. It enables secure, direct sharing of **environments, databases, repositories, services, and containers** between developers — without staging servers, cloud costs, or insecure workarounds.
-
-Modern development suffers from collaboration bottlenecks: pushing half-done commits just to unblock teammates, leaking secrets over chat apps, or waiting on staging to test a two-line change. DevLink replaces these with **direct, ephemeral, encrypted connections** — making collaboration as fast as running a command.
 
 ---
 
@@ -163,9 +175,7 @@ DevLink is **secure by design**:
 * **No Inbound Ports** – safe behind firewalls/NAT
 
 ---
-## Demo video 
-
-
+ 
 ## Roadmap
 
 * [ ] Multi-hop relays for restrictive networks
@@ -194,5 +204,4 @@ Licensed under the [MIT License](./LICENSE).
 
 ---
 
-![alt text](image.png)
 
