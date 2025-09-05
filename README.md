@@ -1,235 +1,204 @@
+Perfect 👍 You want a **professional, OSS-grade README** — no emojis, no fluff, just clean markdown, crisp ASCII logo, and well-structured docs that could sit on GitHub and feel like HashiCorp/Docker/Vercel quality.
 
-Secure, peer-to-peer developer collaboration.
-Share environments, databases, repos, and artifacts without pushing to the cloud.
-# **DevLink CLI Reference**
-
-> A comprehensive guide to all DevLink commands for secure, peer-to-peer developer collaboration.
+Here’s the polished version, with your ASCII block integrated, slightly more detail in commands/security, and consistent formatting.
 
 ---
 
-## **📦 Installation**
+# DevLink
 
-Build and install DevLink locally:
+<div align="center">
+<pre>
+  ____              _     _      _   
+ |  _ \  _____   _| |   (_)_ __ | | __
+ | | | |/ _ \ \ / / |   | | '_ \| |/ /
+ | |_| |  __/\ V /| |___| | | | |   < 
+ |____/ \___| \_/ |_____|_|_| |_|_|\_\
+</pre>
+<h2>The Peer-to-Peer Toolkit for Frictionless Development</h2>
+<p><strong>Stop Configuring. Start Collaborating.</strong></p>
 
-```bash
-git clone <devlink-repo-url>
-cd DevLink
-go build -o devlink
-```
+<a href="#"><img src="https://img.shields.io/github/actions/workflow/status/your-org/devlink/ci.yml?branch=main&style=for-the-badge" alt="Build Status"></a> <a href="#"><img src="https://img.shields.io/github/v/release/your-org/devlink?style=for-the-badge" alt="Latest Release"></a> <a href="./LICENSE"><img src="https://img.shields.io/github/license/your-org/devlink?style=for-the-badge" alt="License"></a> <a href="#"><img src="https://img.shields.io/badge/Go-1.18+-00ADD8.svg?style=for-the-badge&logo=go" alt="Go Version"></a>
 
-Optionally, move it to PATH for global usage:
-
-```bash
-sudo mv devlink /usr/local/bin/
-```
-
----
-
-## **🔐 Environment Sharing (`env`)**
-
-> Share `.env` or secret files securely with teammates.
-
-**Share an environment:**
-
-```bash
-devlink env share
-```
-
-**Fetch an environment:**
-
-```bash
-devlink env get <share-token>
-```
-
-**Key Notes:**
-
-* ✅ End-to-end encrypted
-* ✅ Instant transfer
-* ✅ No third-party servers
+</div>
 
 ---
 
-## **🗄️ Database Sharing (`db`)**
+**DevLink** is a peer-to-peer CLI toolkit that removes development and staging friction. It enables secure, direct sharing of **environments, databases, repositories, services, and containers** between developers — without staging servers, cloud costs, or insecure workarounds.
 
-> Grant ephemeral, read-only access to local databases.
-
-**Share a database (example port 5432):**
-
-```bash
-devlink db share 5432
-```
-
-**Connect to a shared DB locally:**
-
-```bash
-devlink db get <share-token> <local-port>
-```
-
-**Example (Postgres):**
-
-```bash
-psql -h 127.0.0.1 -p <local-port> -U <db-username> -d <db-name>
-```
-
-**Benefits:**
-
-* ✅ Live integration
-* ✅ Secure and ephemeral
-* ✅ Minimal setup
+Modern development suffers from collaboration bottlenecks: pushing half-done commits just to unblock teammates, leaking secrets over chat apps, or waiting on staging to test a two-line change. DevLink replaces these with **direct, ephemeral, encrypted connections** — making collaboration as fast as running a command.
 
 ---
 
-## **🌱 Git Repository Sharing (`git`)**
+## Core Features
 
-> Share your local Git repository without pushing WIP code.
+* **Ephemeral Staging Environments (`hive`)** – Combine multiple developers’ local services into a shared, temporary test environment.
+* **Secure Environment & Secret Sharing (`env`)** – Send `.env` files and secrets over one-time, encrypted transfers.
+* **Peer-to-Peer Git (`git`)** – Serve your local repo directly for cloning/fetching. No WIP pushes required.
+* **Live Database Access (`db`)** – Share a local database instantly, without dumps or imports.
+* **Instant Localhost Streaming (`pair`)** – Expose `localhost` apps securely for demos and pair programming.
+* **Direct Docker Image Transfer (`registry`)** – Push/pull Docker images between machines without registries.
 
-**Serve a repo:**
+---
+
+## Installation
+
+### Prerequisites
+
+* Go `1.18+`
+
+### From Source
 
 ```bash
-cd ~/projects/my-repo
-devlink git serve .
+git clone https://github.com/your-org/devlink.git
+cd devlink
+go build -o devlink ./cmd/devlink
 ```
 
-**Connect to a shared repo:**
+### Using Go Install
 
 ```bash
-devlink git connect <share-token> my-repo.git
+go install github.com/your-org/devlink/cmd/devlink@latest
 ```
 
-**Clone a shared repo:**
+### Verify Installation
 
 ```bash
-git clone git://127.0.0.1:9418/my-repo.git
+devlink --help
 ```
 
-**Continue normal workflow:**
+> Package manager releases (`brew`, `apt`, `winget`) are on the roadmap.
+
+---
+
+## Command Reference
+
+### `devlink hive` – Ephemeral Staging
+
+Create a shared integration space across local machines.
+
+* `devlink hive create <name>` – create a new hive, returns invite token
+* `devlink hive connect <token>` – join an existing hive
+* `devlink hive contribute --service <name> --port <port>` – expose a local service into the hive
 
 ```bash
-git add <file>
-git commit -m "message"
-git push origin main
-git pull
+# Example
+devlink hive create feature-x
+devlink hive contribute --service api --port 5000
+devlink hive connect hx_abc123
 ```
 
 ---
 
-## **🧩 Directory Sharing (`dir`)** *
+### `devlink env` – Secure Env Sharing
 
-> Share entire local directories with teammates in a peer-to-peer manner.
+One-time, encrypted file transfers for secrets.
 
-**Share a directory:**
-
-```bash
-devlink dir share <path>
-```
-
-**Connect / fetch a shared directory:**
+* `devlink env send <file>` – send file, returns code
+* `devlink env receive <code> <output>` – receive file
 
 ```bash
-devlink dir get <share-token> <local-path>
+devlink env send .env.local
+devlink env receive 7-blue-river .env.local
 ```
 
 ---
 
-## **🚀 Hive: Ephemeral Staging Environments (`hive`)**
+### `devlink git` – Peer-to-Peer Git
 
-> Spin up shared temporary environments for integrated testing.
+Serve your repo directly, no remote push required.
 
-**Create a new Hive:**
-
-```bash
-devlink hive create <hive-name>
-```
-
-**Contribute a service:**
+* `devlink git serve` – start temporary Git server
+* `git clone devlink://<code> <dir>` – clone via DevLink transport
 
 ```bash
-devlink hive contribute --service <name> --port <port> --hive <invite-token>
+devlink git serve
+git clone devlink://git_abc123 my-feature
 ```
-
-**Connect to an existing Hive:**
-
-```bash
-devlink hive connect --hive <invite-token>
-```
-
-**Teardown:**
-
-* Press `Ctrl+C` to stop contributing
-* Environment disappears automatically
-
-**Impact:**
-
-* ✅ Live, ephemeral multi-service environment
-* ✅ Fast testing & debugging
-* ✅ Zero-trust P2P network
 
 ---
 
-## **🔗 Pairing with Hive Controller (`pair`)**
+### `devlink db` – Database Sharing
 
-> Connect your CLI to the central Hive Controller for coordination.
+Expose local databases for live queries.
 
-**Pair CLI with controller:**
-
-```bash
-devlink pair get <pair-token> <controller-port>
-```
-
-* Controller becomes available at: `http://localhost:<controller-port>`
-* Required before creating or connecting to Hives
-
----
-
-## **📦 Registry Sharing (`registry`)**
-
-> Share Docker images or local artifacts P2P with teammates.
-
-**Send a Docker image / artifact:**
+* `devlink db share --type <postgres|mysql> --port <port>` – share DB
+* `devlink db connect <code>` – connect to peer DB
 
 ```bash
-devlink registry send <image-name>
+devlink db share --type postgres --port 5432
 ```
 
-**Receive an image / artifact:**
+---
+
+### `devlink pair` – Localhost Streaming
+
+Securely share a local app over HTTPS.
+
+* `devlink pair --port <port>` – stream local app
 
 ```bash
-devlink registry receive <share-token>
+devlink pair --port 3000
 ```
 
-**Key Notes:**
+---
 
-* ✅ Direct P2P transfer
-* ✅ Faster than central registries
-* ✅ Works offline / within team network
+### `devlink registry` – P2P Docker Images
+
+Skip Docker Hub; transfer images directly.
+
+* `devlink registry send <image:tag>` – send image
+* `devlink registry receive <code>` – receive image
+
+```bash
+devlink registry send myapp:latest
+devlink registry receive 12-green-comet
+```
 
 ---
 
-## **📊 Why DevLink is Different**
+## Security Model
 
-* 🔒 Zero-trust: each share scoped to a single tunnel
-* ⚡ Peer-to-peer: no cloud hosting required
-* 🔐 Secure by design: `.env` files, DBs, Git branches never leak
-* 🎯 Real-world usage: hackathons, live demos, team sprints
+DevLink is **secure by design**:
+
+* **Zero-Trust** – every session uses explicit, short-lived tokens
+* **Peer-to-Peer First** – connections are direct when possible, no relays
+* **End-to-End Encrypted** – no plaintext traffic, strong crypto by default
+* **Ephemeral** – sessions vanish when stopped, no persistence
+* **No Inbound Ports** – safe behind firewalls/NAT
+
+---
+## Demo video 
+
+[![DevLink Demo](./assets/video-preview.gif)](./assets/video.mp4)
+
+
+## Roadmap
+
+* [ ] Multi-hop relays for restrictive networks
+* [ ] GUI dashboard for hives
+* [ ] Native packages (`brew`, `apt`, `winget`)
+* [ ] IDE extensions (VS Code, JetBrains)
+* [ ] Optional persistent hives for long-lived staging
 
 ---
 
-## **💡 Example Workflow**
+## Contributing
 
-1. Pair CLI: `devlink pair get <token> <port>`
-2. Share environment: `devlink env share` → teammate `devlink env get <token>`
-3. Share DB: `devlink db share <port>` → teammate connects
-4. Share Git repo: `devlink git serve` → teammate clones
-5. Spin up ephemeral staging: `devlink hive create` → contribute services → QA connects
-6. Share artifacts/images: `devlink registry send <image>` → teammate receives
-7. Teardown: Ctrl+C → environment disappears
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feature/foo`)
+3. Commit changes (`git commit -m "feat: add foo"`)
+4. Push (`git push origin feature/foo`)
+5. Open a pull request
+
+Please open issues for major design changes before contributing.
+
+---
+
+## License
+
+Licensed under the [MIT License](./LICENSE).
 
 ---
 
-✅ **Everything is generic & reusable:**
-
-* Tokens, ports, paths, usernames are placeholders
-* No personal info is exposed
-
----
+![alt text](image.png)
 
