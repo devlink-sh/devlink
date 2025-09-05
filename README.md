@@ -169,8 +169,6 @@ DevLink is **secure by design**:
 ---
 ## Demo video 
 
-[![DevLink Demo](./assets/video-preview.gif)](./assets/video.mp4)
-
 
 ## Roadmap
 
