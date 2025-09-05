@@ -19,18 +19,19 @@ Modern development suffers from collaboration bottlenecks: pushing half-done com
 <h2>The Peer-to-Peer Toolkit for Frictionless Development</h2>
 <p><strong>Stop Configuring. Start Collaborating.</strong></p>
 
-<a href="https://github.com/gupta-nu/devlynk/actions">
-  <img src="https://img.shields.io/github/actions/workflow/status/gupta-nu/devlynk/ci.yml?branch=main&style=for-the-badge" alt="Build Status">
+<a href="https://github.com/gupta-nu/devlink/actions">
+  <img src="https://img.shields.io/github/actions/workflow/status/gupta-nu/devlink/ci.yml?branch=main&style=for-the-badge" alt="Build Status">
 </a>
-<a href="https://github.com/gupta-nu/devlynk/releases">
-  <img src="https://img.shields.io/github/v/release/gupta-nu/devlynk?style=for-the-badge" alt="Latest Release">
+<a href="https://github.com/gupta-nu/devlink/releases">
+  <img src="https://img.shields.io/github/v/release/gupta-nu/devlink?style=for-the-badge" alt="Latest Release">
 </a>
 <a href="./LICENSE">
-  <img src="https://img.shields.io/github/license/gupta-nu/devlynk?style=for-the-badge" alt="License">
+  <img src="https://img.shields.io/github/license/gupta-nu/devlink?style=for-the-badge" alt="License">
 </a>
 <a href="#">
   <img src="https://img.shields.io/badge/Go-1.18+-00ADD8.svg?style=for-the-badge&logo=go" alt="Go Version">
 </a>
+
 
 
 </div>
