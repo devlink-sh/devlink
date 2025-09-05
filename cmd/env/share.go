@@ -28,10 +28,10 @@ var envShareCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		share, err :=  sdk.CreateShare(root, &sdk.ShareRequest{
+		share, err := sdk.CreateShare(root, &sdk.ShareRequest{
 			BackendMode: sdk.TcpTunnelBackendMode,
-			ShareMode:  sdk.PrivateShareMode,
-			Target:	"env",
+			ShareMode:   sdk.PrivateShareMode,
+			Target:      "env",
 		})
 
 		if err != nil {
@@ -47,8 +47,8 @@ var envShareCmd = &cobra.Command{
 
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-		go func(){
-			<- c
+		go func() {
+			<-c
 			if err := sdk.DeleteShare(root, share); err != nil {
 				log.Printf("error deleting share: %v", err)
 			}
@@ -56,14 +56,14 @@ var envShareCmd = &cobra.Command{
 			os.Exit(0)
 		}()
 
-		go func(){
-			for{
+		go func() {
+			for {
 				conn, err := listener.Accept()
 				if err != nil {
 					log.Printf("error accepting connection: %v", err)
 					return
 				}
-				go func(c net.Conn){
+				go func(c net.Conn) {
 					defer c.Close()
 					_, _ = c.Write(envFile)
 				}(conn)
@@ -71,7 +71,6 @@ var envShareCmd = &cobra.Command{
 		}()
 
 		select {}
-
 
 	},
 }

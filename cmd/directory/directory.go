@@ -7,7 +7,7 @@ var DirectoryCmd = &cobra.Command{
 	Short: "Manage directories",
 }
 
-func init(){
+func init() {
 	DirectoryCmd.AddCommand(directoryShareCmd)
 	DirectoryCmd.AddCommand(directoryGetCmd)
 }

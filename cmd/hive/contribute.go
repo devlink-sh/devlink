@@ -24,10 +24,6 @@ var hiveContributeCmd = &cobra.Command{
 			log.Fatal("must provide --service, --port, and --hive")
 		}
 
-		if controllerURL == "" {
-			controllerURL = "http://localhost:8081"
-		}
-
 		root, err := environment.LoadRoot()
 		if err != nil {
 			log.Fatal(err)
@@ -41,14 +37,9 @@ var hiveContributeCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-<<<<<<< HEAD
 
 		url := fmt.Sprintf("%s/hives/contribute?hive=%s&service=%s&port=%s&token=%s",
-			controllerURL, hiveToken, service, port, share.Token)
-=======
-		url := fmt.Sprintf("%s/hives/contribute?hive=%s&service=%s&port=%s&token=%s",
 			BaseURL, hiveToken, service, port, share.Token)
->>>>>>> eb03ba59dbe0f48a9a05c705ffbfd12b477ec1dd
 		_, err = http.Post(url, "text/plain", nil)
 		if err != nil {
 			log.Fatal(err)
@@ -101,10 +92,8 @@ func Pipe(a, b net.Conn) {
 	<-done
 }
 
-
 func init() {
 	hiveContributeCmd.Flags().String("service", "", "service name (e.g. api, frontend)")
 	hiveContributeCmd.Flags().String("port", "", "local port to share")
 	hiveContributeCmd.Flags().String("hive", "", "hive invite token")
-	hiveContributeCmd.Flags().StringVar(&controllerURL, "controller", "http://localhost:8081", "Hive controller URL")
 }

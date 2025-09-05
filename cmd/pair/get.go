@@ -1,9 +1,9 @@
 package pair
 
 import (
+	"io"
 	"log"
 	"net"
-	"io"
 
 	"github.com/openziti/zrok/environment"
 	"github.com/openziti/zrok/sdk/golang/sdk"

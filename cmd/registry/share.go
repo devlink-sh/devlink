@@ -1,7 +1,5 @@
 package registry
 
-
-
 import (
 	"io"
 	"log"

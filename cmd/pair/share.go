@@ -38,14 +38,14 @@ var pairShareCmd = &cobra.Command{
 		}
 		defer listener.Close()
 
-		for{
+		for {
 			conn, err := listener.Accept()
 			if err != nil {
 				log.Printf("error accepting incoming connection: %v", err)
 				continue
 			}
 
-			go func(remote net.Conn){
+			go func(remote net.Conn) {
 				local, err := net.Dial("tcp", "127.0.0.1:"+port)
 				if err != nil {
 					log.Printf("error connecting to local service: %v", err)

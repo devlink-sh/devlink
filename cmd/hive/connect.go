@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 
 	"github.com/openziti/zrok/environment"
@@ -18,13 +17,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Service struct must match Hive Controller response
 type Service struct {
 	Name  string `json:"name"`
 	Port  string `json:"port"`
 	Token string `json:"token"`
 }
-
-var controllerURL string
 
 var hiveConnectCmd = &cobra.Command{
 	Use:   "connect --hive <token>",
@@ -35,21 +33,14 @@ var hiveConnectCmd = &cobra.Command{
 			log.Fatal("must provide --hive token")
 		}
 
-		if controllerURL == "" {
-			controllerURL = "http://localhost:8081"
-		}
-
+		// Load zrok root identity
 		root, err := environment.LoadRoot()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-<<<<<<< HEAD
-		url := fmt.Sprintf("%s/hives/services?hive=%s", controllerURL, hiveToken)
-=======
 		// Fetch services from Hive Controller
 		url := fmt.Sprintf("%s/hives/services?hive=%s", BaseURL, hiveToken)
->>>>>>> eb03ba59dbe0f48a9a05c705ffbfd12b477ec1dd
 		resp, err := http.Get(url)
 		if err != nil {
 			log.Fatalf("error querying hive controller: %v", err)
@@ -71,77 +62,61 @@ var hiveConnectCmd = &cobra.Command{
 			return
 		}
 
-		var wg sync.WaitGroup
-		var listeners []net.Listener
-
+		// Start listeners for each service
 		for _, svc := range services {
-			wg.Add(1)
-			go func(s Service) {
-				defer wg.Done()
-				l, err := startLocalListener(s, root)
-				if err == nil {
-					listeners = append(listeners, l)
-				}
-			}(svc)
+			go startLocalListener(svc, root)
 		}
 
-		// graceful shutdown
+		// Keep running until Ctrl+C
+		log.Println("Connected to Hive! Press Ctrl+C to exit.")
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 		<-c
-
-		log.Println("Shutting down listeners...")
-		for _, l := range listeners {
-			_ = l.Close()
-		}
 	},
 }
 
-func startLocalListener(svc Service, root env_core.Root) (net.Listener, error) {
+func startLocalListener(svc Service, root env_core.Root) {
+	// Create Access for this service
 	acc, err := sdk.CreateAccess(root, &sdk.AccessRequest{ShareToken: svc.Token})
 	if err != nil {
 		log.Printf("[%s] create access error: %v", svc.Name, err)
-		return nil, err
+		return
 	}
 	defer sdk.DeleteAccess(root, acc)
 
 	listener, err := net.Listen("tcp", "127.0.0.1:"+svc.Port)
 	if err != nil {
 		log.Printf("[%s] listener error: %v", svc.Name, err)
-		return nil, err
+		return
 	}
+	defer listener.Close()
 
 	log.Printf("Service '%s' ready at http://127.0.0.1:%s", svc.Name, svc.Port)
 
-	go func() {
-		for {
-			client, err := listener.Accept()
+	for {
+		client, err := listener.Accept()
+		if err != nil {
+			log.Printf("[%s] accept error: %v", svc.Name, err)
+			continue
+		}
+
+		go func(c net.Conn) {
+			defer c.Close()
+
+			remote, err := sdk.NewDialer(svc.Token, root)
 			if err != nil {
-				log.Printf("[%s] accept error: %v", svc.Name, err)
+				log.Printf("[%s] dial error: %v", svc.Name, err)
 				return
 			}
+			defer remote.Close()
 
-			go func(c net.Conn) {
-				defer c.Close()
-
-				remote, err := sdk.NewDialer(svc.Token, root)
-				if err != nil {
-					log.Printf("[%s] dial error: %v", svc.Name, err)
-					return
-				}
-				defer remote.Close()
-
-				log.Printf("[%s] client connected", svc.Name)
-				go io.Copy(remote, c)
-				io.Copy(c, remote)
-			}(client)
-		}
-	}()
-
-	return listener, nil
+			log.Printf("[%s] client connected", svc.Name)
+			go io.Copy(remote, c)
+			io.Copy(c, remote)
+		}(client)
+	}
 }
 
 func init() {
 	hiveConnectCmd.Flags().String("hive", "", "hive invite token")
-	hiveConnectCmd.Flags().StringVar(&controllerURL, "controller", "http://localhost:8081", "Hive controller URL")
 }

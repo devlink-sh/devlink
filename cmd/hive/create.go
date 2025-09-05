@@ -1,6 +1,7 @@
 package hive
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -15,15 +16,16 @@ var hiveCreateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]
 
-		resp, err := http.Get("http://localhost:8081/hives/create?name=" + name)
+		// Use BaseURL for consistency
+		resp, err := http.Get(fmt.Sprintf("%s/hives/create?name=%s", BaseURL, name))
 		if err != nil {
 			log.Fatal(err)
 		}
 		defer resp.Body.Close()
+
 		tokenBytes, _ := io.ReadAll(resp.Body)
 		token := string(tokenBytes)
 
 		log.Printf("Hive '%s' created! Invite token: %s", name, token)
-
 	},
 }

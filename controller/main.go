@@ -17,8 +17,8 @@ type Service struct {
 }
 
 type Hive struct {
-	Name     string              `json:"name"`
-	Services map[string]Service  `json:"services"`
+	Name     string             `json:"name"`
+	Services map[string]Service `json:"services"`
 }
 
 var (
