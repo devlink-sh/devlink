@@ -1,6 +1,6 @@
 
 
----
+
 
 **DevLink** is a peer-to-peer CLI toolkit that removes development and staging friction. It enables secure, direct sharing of **environments, databases, repositories, services, and containers** between developers, without staging servers, cloud costs, or insecure workarounds.
 
@@ -36,7 +36,7 @@ Modern development suffers from collaboration bottlenecks: pushing half-done com
 
 </div>
 
----
+
 
 ## Core Features
 
@@ -47,9 +47,9 @@ Modern development suffers from collaboration bottlenecks: pushing half-done com
 * **Instant Localhost Streaming (`pair`)** – Expose `localhost` apps securely for demos and pair programming.
 * **Direct Docker Image Transfer (`registry`)** – Push/pull Docker images between machines without registries.
 
----
 
-## 🚀 Quick Start
+
+##  Quick Start
 
 ### Install via Homebrew (Recommended)
 
@@ -107,9 +107,8 @@ devlink --help
 zrok version  # Should show zrok is installed
 ```
 
-> 🎯 **Why zrok?** DevLink uses zrok for quantum-resistant, zero-trust P2P tunnels. It provides enterprise-grade security without complex networking setup.
+>  **Why zrok?** DevLink uses zrok for quantum-resistant, zero-trust P2P tunnels. It provides enterprise-grade security without complex networking setup.
 
----
 
 ## Command Reference
 
@@ -128,7 +127,7 @@ devlink hive contribute --service api --port 5000
 devlink hive connect hx_abc123
 ```
 
----
+
 
 ### `devlink env` – Secure Env Sharing
 
@@ -142,7 +141,7 @@ devlink env send .env.local
 devlink env receive 7-blue-river .env.local
 ```
 
----
+
 
 ### `devlink git` – Peer-to-Peer Git
 
@@ -156,7 +155,7 @@ devlink git serve
 git clone devlink://git_abc123 my-feature
 ```
 
----
+
 
 ### `devlink db` – Database Sharing
 
@@ -169,7 +168,6 @@ Expose local databases for live queries.
 devlink db share --type postgres --port 5432
 ```
 
----
 
 ### `devlink pair` – Localhost Streaming
 
@@ -181,7 +179,7 @@ Securely share a local app over HTTPS.
 devlink pair --port 3000
 ```
 
----
+
 
 ### `devlink registry` – P2P Docker Images
 
@@ -195,7 +193,7 @@ devlink registry send myapp:latest
 devlink registry receive 12-green-comet
 ```
 
----
+
 
 ## Security Model
 
@@ -207,7 +205,7 @@ DevLink is **secure by design**:
 * **Ephemeral** – sessions vanish when stopped, no persistence
 * **No Inbound Ports** – safe behind firewalls/NAT
 
----
+
  
 ## Roadmap
 
@@ -217,7 +215,7 @@ DevLink is **secure by design**:
 * [ ] IDE extensions (VS Code, JetBrains)
 * [ ] Optional persistent hives for long-lived staging
 
----
+
 
 ## Contributing
 
@@ -229,12 +227,12 @@ DevLink is **secure by design**:
 
 Please open issues for major design changes before contributing.
 
----
+
 
 ## License
 
 Licensed under the [MIT License](./LICENSE).
 
----
+
 
 
