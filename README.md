@@ -2,9 +2,9 @@
 
 ---
 
-**DevLink** is a peer-to-peer CLI toolkit that removes development and staging friction. It enables secure, direct sharing of **environments, databases, repositories, services, and containers** between developers — without staging servers, cloud costs, or insecure workarounds.
+**DevLink** is a peer-to-peer CLI toolkit that removes development and staging friction. It enables secure, direct sharing of **environments, databases, repositories, services, and containers** between developers, without staging servers, cloud costs, or insecure workarounds.
 
-Modern development suffers from collaboration bottlenecks: pushing half-done commits just to unblock teammates, leaking secrets over chat apps, or waiting on staging to test a two-line change. DevLink replaces these with **direct, ephemeral, encrypted connections** — making collaboration as fast as running a command.
+Modern development suffers from collaboration bottlenecks: pushing half-done commits just to unblock teammates, leaking secrets over chat apps, or waiting on staging to test a two-line change. DevLink replaces these with **direct, ephemeral, encrypted connections** - making collaboration as fast as running a command.
 
 # DevLink
 
