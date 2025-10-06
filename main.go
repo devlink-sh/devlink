@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/devlink/cmd"
+	"github.com/devlink-sh/devlink/cmd"
 )
 
 func main() {
