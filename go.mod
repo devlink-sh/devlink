@@ -3,7 +3,7 @@ module github.com/devlink-sh/devlink
 go 1.20
 
 require (
-	github.com/openziti/zrok v1.1.3
+	github.com/openziti/zrok v0.4.32
 	github.com/spf13/cobra v1.9.1
 )
 
