@@ -11,7 +11,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/devlink/internal"
+	"github.com/devlink-sh/devlink/internal"
 	"github.com/openziti/zrok/environment"
 	"github.com/openziti/zrok/sdk/golang/sdk"
 	"github.com/spf13/cobra"

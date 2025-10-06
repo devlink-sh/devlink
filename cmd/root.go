@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/devlink/cmd/db"
-	"github.com/devlink/cmd/directory"
-	"github.com/devlink/cmd/env"
-	"github.com/devlink/cmd/git"
-	"github.com/devlink/cmd/hive"
-	"github.com/devlink/cmd/pair"
-	"github.com/devlink/cmd/registry"
+	"github.com/devlink-sh/devlink/cmd/db"
+	"github.com/devlink-sh/devlink/cmd/directory"
+	"github.com/devlink-sh/devlink/cmd/env"
+	"github.com/devlink-sh/devlink/cmd/git"
+	"github.com/devlink-sh/devlink/cmd/hive"
+	"github.com/devlink-sh/devlink/cmd/pair"
+	"github.com/devlink-sh/devlink/cmd/registry"
 	"github.com/spf13/cobra"
 )
 

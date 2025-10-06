@@ -49,33 +49,65 @@ Modern development suffers from collaboration bottlenecks: pushing half-done com
 
 ---
 
-## Installation
+## 🚀 Quick Start
+
+### Install via Homebrew (Recommended)
+
+```bash
+# Add the DevLink tap
+brew tap devlink-sh/devlink
+
+# Install DevLink with dependencies (includes zrok for quantum-resistant tunneling)
+brew install devlink
+
+# One-time setup: Initialize quantum-resistant environment
+zrok enable
+
+# Initialize DevLink
+devlink init
+```
+
+### Install from Source
+
+```bash
+# 1. Install zrok (quantum-resistant tunneling infrastructure)
+curl -sSLf https://get.zrok.io | bash
+
+# 2. Clone and build DevLink
+git clone https://github.com/devlink-sh/devlink.git
+cd devlink
+go build -o devlink ./cmd/devlink
+sudo cp devlink /usr/local/bin/
+
+# 3. One-time setup
+zrok enable  # Creates quantum-resistant identity
+devlink init # Configures DevLink
+```
+
+### Alternative: Automated Install Script
+
+```bash
+# Download and run our installer (includes all dependencies)
+curl -sSL https://raw.githubusercontent.com/devlink-sh/devlink/main/install.sh | bash
+
+# Follow the guided setup
+devlink init
+```
 
 ### Prerequisites
 
-* Go `1.18+`
-
-### From Source
-
-```bash
-git clone https://github.com/your-org/devlink.git
-cd devlink
-go build -o devlink ./cmd/devlink
-```
-
-### Using Go Install
-
-```bash
-go install github.com/your-org/devlink/cmd/devlink@latest
-```
+* **Go 1.20+** (for building from source)
+* **zrok** (quantum-resistant tunneling - auto-installed with Homebrew)
+* **OpenZiti identity** (created during `zrok enable`)
 
 ### Verify Installation
 
 ```bash
 devlink --help
+zrok version  # Should show zrok is installed
 ```
 
-> Package manager releases (`brew`, `apt`, `winget`) are on the roadmap.
+> 🎯 **Why zrok?** DevLink uses zrok for quantum-resistant, zero-trust P2P tunnels. It provides enterprise-grade security without complex networking setup.
 
 ---
 
